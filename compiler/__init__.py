@@ -1,3 +1,3 @@
 """
-Compiler module for the IFSC Compiler Project
+Compiler module for the Compiler Project
 """

@@ -48,8 +48,7 @@ app = FastAPI(
     """,
     version="0.0.1",
     contact={
-        "name": "IFSC Compiladores",
-        "url": "https://github.com/seu-usuario/projeto-compiladores-ifsc",
+        "name": "Compiladores",
     },
     license_info={
         "name": "MIT",
@@ -106,7 +105,7 @@ async def health():
     """🏥 **Health check** - Verifica se a API está funcionando"""
     return {
         "status": "✅ healthy",
-        "service": "Compilador IFSC",
+        "service": "Compilador",
         "timestamp": "2025-10-06",
         "features_available": True
     }

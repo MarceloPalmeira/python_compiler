@@ -1,6 +1,4 @@
-# Projeto Compiladores - Python Version
-
-Este é a versão Python do projeto de compiladores do IFSC, convertido do projeto Java original.
+# Projeto Compiladores 
 
 ## 🚀 Setup Rápido
 
@@ -224,10 +222,6 @@ Reinstale as dependências:
 ```bash
 pip install -r requirements.txt
 ```
-
-## 📄 Licença
-
-Mesmo projeto original do IFSC, convertido para Python.
 
 ## 🤝 Contribuição
 
