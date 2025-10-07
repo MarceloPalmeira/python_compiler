@@ -1,0 +1,3 @@
+int x;
+x = 42;
+println("Hello, World! The answer is:", x);
