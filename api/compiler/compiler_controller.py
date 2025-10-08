@@ -47,6 +47,28 @@ class CompilationResponse(BaseModel):
     llvm_ir: str = Field(..., description="Código LLVM IR gerado")
 
 
+@router.post("/upload",
+             response_model=CodeResponse,
+             summary="📝 Upload de Código",
+             description="""
+            **Faz upload do código fonte e retorna um ID único.**
+
+            O código será:
+            1. ✅ Validado sintaticamente
+            2. 🆔 Armazenado com ID único
+            3. ⚙️ Compilado para verificar erros
+
+            **Linguagem suportada:**
+            - Sintaxe similar ao C
+            - Tipos: `int`, `float`, `char`, `boolean`
+            - Funções, loops, condicionais
+            - Arrays e operações matemáticas
+            """,
+             responses={
+                 200: {"description": "✅ Upload realizado com sucesso"},
+                 400: {"description": "❌ Erro de compilação ou sintaxe"}
+             })
+
 @router.get("/optimization-levels",
            summary="📋 Níveis de Otimização Disponíveis",
            description="""
@@ -83,28 +105,6 @@ async def get_optimization_levels():
         ]
     }
 
-
-@router.post("/upload", 
-            response_model=CodeResponse,
-            summary="📝 Upload de Código",
-            description="""
-            **Faz upload do código fonte e retorna um ID único.**
-            
-            O código será:
-            1. ✅ Validado sintaticamente
-            2. 🆔 Armazenado com ID único
-            3. ⚙️ Compilado para verificar erros
-            
-            **Linguagem suportada:**
-            - Sintaxe similar ao C
-            - Tipos: `int`, `float`, `char`, `boolean`
-            - Funções, loops, condicionais
-            - Arrays e operações matemáticas
-            """,
-            responses={
-                200: {"description": "✅ Upload realizado com sucesso"},
-                400: {"description": "❌ Erro de compilação ou sintaxe"}
-            })
 async def upload_code(request: CodeUploadRequest):
     """📤 **Upload código fonte** - Envia código e recebe ID único"""
     try:
