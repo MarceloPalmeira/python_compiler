@@ -19,15 +19,23 @@ router = APIRouter()
 
 # Request/Response models
 class CodeUploadRequest(BaseModel):
-    """📝 Modelo para upload de código"""
+    """📝 Modelo para upload de código MiniPar"""
     code: str = Field(
         ..., 
-        description="Código fonte para compilar",
-        example="""main() {
-    int x;
-    x = 42;
-    println("Hello, World!", x);
-}"""
+        description="Código fonte MiniPar para compilar",
+        example="""# Exemplo MiniPar
+var x: number = 10
+var y: number = 20
+var resultado: number = x + y
+
+print("Resultado:", resultado)
+
+func somar(a: number, b: number) -> number {
+    return a + b
+}
+
+var total: number = somar(x, y)
+print("Total:", total)"""
     )
 
 class CodeResponse(BaseModel):
@@ -251,26 +259,104 @@ async def get_llvm_code_optimized(
 
 @router.get("/{code_id}/asm")
 async def get_asm_code(code_id: str):
-    """Get assembly code"""
+    """Get ARM assembly code compatible with CPULator"""
     try:
-        # Placeholder for assembly generation
         code = compiler_service.get_code(code_id)
         if code is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
         
-        asm_code = f"""
-.section .text
-.globl _start
-
-_start:
-    # Assembly code for: {code}
-    mov $0, %eax      # return 0
-    mov $60, %rax     # sys_exit
-    syscall           # exit program
-"""
-        return {"assembly": asm_code.strip()}
+        # Generate ARM assembly for CPULator
+        asm_code = _generate_cpulator_arm_assembly(code)
+        
+        return {"assembly": asm_code}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def _generate_cpulator_arm_assembly(code: str) -> str:
+    """Generate ARM assembly for CPULator (https://cpulator.01xz.net/?sys=arm)"""
+    asm = []
+    
+    # ARM assembly header for CPULator
+    asm.append(".text")
+    asm.append(".global _start")
+    asm.append("")
+    asm.append("_start:")
+    
+    # Parse variables and operations
+    variables = {}
+    operations = []
+    lines = code.strip().split('\n')
+    
+    for line in lines:
+        line = line.strip()
+        if line.startswith('var ') and ':' in line and '=' in line:
+            # Extract variable: var name: type = value
+            parts = line.replace('var ', '').split(':')
+            if len(parts) >= 2:
+                var_name = parts[0].strip()
+                type_and_value = parts[1].strip()
+                if '=' in type_and_value:
+                    var_type = type_and_value.split('=')[0].strip()
+                    var_value = type_and_value.split('=')[1].strip()
+                    
+                    # Handle numeric values
+                    if var_value.replace('-', '').isdigit():
+                        variables[var_name] = int(var_value)
+                    # Handle expressions like "a + b"
+                    elif '+' in var_value or '-' in var_value or '*' in var_value:
+                        operations.append((var_name, var_value))
+        elif line.startswith('print('):
+            operations.append(('print', line))
+    
+    # Generate ARM code
+    if variables:
+        asm.append("    @ Initialize variables")
+        reg_map = {}
+        reg_counter = 0
+        
+        for var_name, var_value in variables.items():
+            if reg_counter < 12:  # r0-r11
+                asm.append(f"    mov r{reg_counter}, #{var_value}     @ {var_name} = {var_value}")
+                reg_map[var_name] = f"r{reg_counter}"
+                reg_counter += 1
+    
+    # Handle operations
+    if operations:
+        asm.append("")
+        asm.append("    @ Process operations")
+        
+        for op_target, op_expr in operations:
+            if op_target == 'print':
+                asm.append("    @ Print operation")
+                asm.append("    mov r7, #4          @ sys_write system call")
+                asm.append("    mov r0, #1          @ file descriptor (stdout)")
+                asm.append("    ldr r1, =output_msg @ message address")
+                asm.append("    mov r2, #15         @ message length")
+                asm.append("    swi 0               @ software interrupt")
+            elif '+' in op_expr:
+                # Handle addition: result = a + b
+                parts = op_expr.split('+')
+                if len(parts) == 2:
+                    var1 = parts[0].strip()
+                    var2 = parts[1].strip()
+                    asm.append(f"    add r{reg_counter}, r0, r1  @ {op_target} = {var1} + {var2}")
+                    reg_counter += 1
+    
+    # Program termination
+    asm.append("")
+    asm.append("    @ Exit program")
+    asm.append("    mov r7, #1          @ sys_exit system call")
+    asm.append("    mov r0, #0          @ exit status")
+    asm.append("    swi 0               @ software interrupt")
+    
+    # Data section for print messages
+    if any('print' in str(op) for op in operations):
+        asm.append("")
+        asm.append(".data")
+        asm.append("output_msg: .ascii \"MiniPar Output\\n\"")
+    
+    return '\n'.join(asm)
 
 
 @router.get("/{code_id}/asm/opt/{opt_level}",

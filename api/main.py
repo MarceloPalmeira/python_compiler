@@ -14,36 +14,54 @@ sys.path.append(str(Path(__file__).parent.parent))
 from .compiler.compiler_controller import router as compiler_router
 
 app = FastAPI(
-    title="Projeto Compiladores - API",
+    title="Projeto Compiladores MiniPar - API",
     description="""
-    🚀 **Compilador Python para LLVM IR**
+    🚀 **Compilador MiniPar para LLVM IR**
     
-    Esta API permite compilar código de uma linguagem customizada para LLVM IR e realizar várias análises.
+    Esta API permite compilar código da linguagem **MiniPar** para LLVM IR e realizar várias análises.
+    
+    ## Linguagem MiniPar
+    
+    A linguagem MiniPar possui sintaxe moderna e recursos avançados:
+    
+    * **Tipos**: `number`, `bool`, `string`, `list`, `dict`, `void`, `any`
+    * **Declarações**: `var nome: tipo = valor`
+    * **Funções**: `func nome(param: tipo) -> tipo { ... }`
+    * **Estruturas**: `if/else`, `while`, `for`, `par` (paralelo)
+    * **Built-ins**: `print()`, `input()`, `sleep()`
     
     ## Funcionalidades
     
-    * **📝 Compilação**: Converte código fonte para LLVM IR
+    * **📝 Compilação**: Converte código MiniPar para LLVM IR
     * **🔍 Análise Sintática**: Gera árvore sintática do código
     * **🏷️ Tokens**: Lista todos os tokens lexicais
     * **📊 Símbolos**: Tabela de símbolos e escopo
     * **📈 Complexidade**: Análise de complexidade algorítmica
     * **⚡ Otimização**: Diferentes níveis de otimização LLVM
-    * **🔧 Assembly**: Geração de código assembly
+    * **🔧 Assembly ARM**: Geração de código assembly para CPULator
     
     ## Como usar
     
-    1. **Upload**: Faça POST em `/compiler/upload` com seu código
+    1. **Upload**: Faça POST em `/compiler/upload` com seu código MiniPar
     2. **Compile**: Use o `code_id` retornado nos outros endpoints
     3. **Explore**: Use os endpoints de análise para estudar o código
     
-    ## Exemplo de código suportado
+    ## Exemplo de código MiniPar
     
-    ```c
-    main() {
-        int x;
-        x = 42;
-        println("Hello, World!", x);
+    ```minipar
+    # Exemplo básico MiniPar
+    var x: number = 10
+    var y: number = 20
+    var resultado: number = x + y
+    
+    print("Resultado:", resultado)
+    
+    func somar(a: number, b: number) -> number {
+        return a + b
     }
+    
+    var total: number = somar(x, y)
+    print("Total:", total)
     ```
     """,
     version="0.0.1",
@@ -82,20 +100,21 @@ app.include_router(compiler_router, prefix="/compiler", tags=["compiler"])
 async def root():
     """🏠 **Root endpoint** - Informações básicas da API"""
     return {
-        "message": "🚀 Projeto Compiladores - Python API",
+        "message": "🚀 Projeto Compiladores MiniPar - Python API",
         "version": "0.0.1",
+        "language": "MiniPar",
         "docs": "/docs",
         "swagger": "/docs",
         "redoc": "/redoc",
         "openapi": "/openapi.json",
         "features": [
-            "📝 Compilação para LLVM IR",
+            "📝 Compilação MiniPar para LLVM IR",
             "🔍 Análise sintática",
             "🏷️ Análise lexical",
             "📊 Tabela de símbolos",
             "📈 Análise de complexidade",
             "⚡ Otimização LLVM",
-            "🔧 Geração de assembly"
+            "🔧 Geração de assembly ARM para CPULator"
         ]
     }
 

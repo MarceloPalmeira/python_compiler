@@ -88,20 +88,14 @@ class CompilerCommand:
             print("Enter more code (--stop to compile, --exit to exit):")
     
     def _compile_code(self, code: str) -> str:
-        """Compile code string to LLVM IR"""
+        """Compile MiniPar code string to LLVM IR"""
         try:
-            # Import here to avoid circular imports and allow for missing ANTLR files
-            from antlr4 import InputStream, CommonTokenStream
-            from .generated.LexerGrammar import LexerGrammar
-            from .generated.ParserGrammar import ParserGrammar
-            from .llvm.llvm_compiler import LLVMCompiler
-        except ImportError as e:
-            raise Exception(f"Required modules not found: {e}. Please run generate_antlr script first.")
-        
-        try:
-            return LLVMCompiler.compile_to_ir(code)
+            # Use simple MiniPar compiler (no ANTLR dependencies)
+            from .llvm.simple_minipar_compiler import SimpleMiniparCompiler
+            compiler = SimpleMiniparCompiler()
+            return compiler.compile_to_ir(code)
         except Exception as e:
-            raise Exception(f"Compilation failed: {e}")
+            raise Exception(f"MiniPar compilation failed: {e}")
     
     def _show_parse_tree(self, parser, tree):
         """Display parse tree (placeholder for GUI implementation)"""

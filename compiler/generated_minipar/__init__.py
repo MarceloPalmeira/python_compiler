@@ -1,0 +1,1 @@
+# Placeholder para arquivos gerados do ANTLR MiniPar

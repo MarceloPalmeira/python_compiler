@@ -6,12 +6,20 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, Optional
+import sys
+import tempfile
+
+# Adiciona o diretório do compilador ao path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'compiler', 'llvm'))
+from simple_minipar_compiler import SimpleMiniparCompiler
 
 class CompilerService:
     def __init__(self):
         self.cache_dir = "cache"
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
+        # Inicializa o compilador MiniPar
+        self.minipar_compiler = SimpleMiniparCompiler()
     
     def upload_code(self, source_code: str) -> str:
         """
@@ -50,148 +58,159 @@ class CompilerService:
     
     def compile_to_llvm_ir(self, code_id: str) -> Optional[str]:
         """
-        Compila código para LLVM IR
+        Compila código MiniPar para LLVM IR usando SimpleMiniparCompiler
         """
         source_code = self.get_code(code_id)
         if not source_code:
             return None
         
-        # Por enquanto, retorna um LLVM IR simples como placeholder
-        llvm_ir = f"""
-; ModuleID = 'compiled_code_{code_id}'
-source_filename = "input.c"
-target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-pc-linux-gnu"
-
-; Código fonte original:
+        try:
+            # Usa o compilador MiniPar para gerar LLVM IR
+            llvm_ir = self.minipar_compiler.compile_to_ir(source_code)
+            return llvm_ir
+        except Exception as e:
+            # Em caso de erro, retorna um IR básico com comentário do erro
+            return f"""; Erro na compilação: {str(e)}
+; Código fonte:
 ; {source_code}
 
-; Função principal
-define dso_local i32 @main() #0 {{
+define i32 @main() {{
 entry:
-  %retval = alloca i32, align 4
-  store i32 0, i32* %retval, align 4
-  ret i32 0
+    ret i32 1
 }}
-
-attributes #0 = {{ noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }}
-
-!llvm.module.flags = !{{!0, !1, !2}}
-!llvm.ident = !{{!3}}
-
-!0 = !{{i32 1, !"wchar_size", i32 4}}
-!1 = !{{i32 7, !"PIC Level", i32 2}}
-!2 = !{{i32 7, !"PIE Level", i32 2}}
-!3 = !{{!"clang version 11.0.0"}}
 """
-        return llvm_ir.strip()
     
     def get_syntax_tree(self, code_id: str) -> Optional[Dict]:
         """
-        Gera árvore sintática do código
+        Gera árvore sintática do código MiniPar
         """
         source_code = self.get_code(code_id)
         if not source_code:
             return None
         
-        # Placeholder para árvore sintática
-        return {
-            "type": "Program",
-            "children": [
-                {
-                    "type": "FunctionDeclaration",
-                    "name": "main",
-                    "returnType": "int",
-                    "parameters": [],
-                    "body": {
-                        "type": "Block",
-                        "statements": [
-                            {
-                                "type": "ReturnStatement",
-                                "value": {
-                                    "type": "IntegerLiteral",
-                                    "value": 0
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        }
+        try:
+            # Usa o compilador MiniPar para gerar AST
+            ast = self.minipar_compiler.parse(source_code)
+            return ast
+        except Exception as e:
+            # Retorna informações de erro
+            return {
+                "error": f"Erro na análise sintática: {str(e)}",
+                "source_code": source_code
+            }
     
     def get_tokens(self, code_id: str) -> Optional[list]:
         """
-        Gera lista de tokens do código
+        Gera lista de tokens do código MiniPar
         """
         source_code = self.get_code(code_id)
         if not source_code:
             return None
         
-        # Placeholder para tokenização simples
-        tokens = []
-        words = source_code.split()
-        
-        for i, word in enumerate(words):
-            if word in ['int', 'float', 'char', 'void']:
-                tokens.append({
-                    "type": "TYPE",
-                    "value": word,
-                    "line": 1,
-                    "column": i * 5
-                })
-            elif word in ['if', 'else', 'while', 'for', 'return']:
-                tokens.append({
-                    "type": "KEYWORD",
-                    "value": word,
-                    "line": 1,
-                    "column": i * 5
-                })
-            elif word.isdigit():
-                tokens.append({
-                    "type": "NUMBER",
-                    "value": word,
-                    "line": 1,
-                    "column": i * 5
-                })
-            else:
-                tokens.append({
-                    "type": "IDENTIFIER",
-                    "value": word,
-                    "line": 1,
-                    "column": i * 5
-                })
-        
-        return tokens
+        try:
+            # Usa o compilador MiniPar para tokenizar
+            tokens = self.minipar_compiler.tokenize(source_code)
+            return tokens
+        except Exception as e:
+            # Retorna tokenização básica em caso de erro
+            lines = source_code.split('\n')
+            tokens = []
+            
+            for line_num, line in enumerate(lines, 1):
+                words = line.strip().split()
+                col = 0
+                
+                for word in words:
+                    if word in ['var', 'func', 'print', 'if', 'else', 'while', 'for', 'return']:
+                        tokens.append({
+                            "type": "KEYWORD",
+                            "value": word,
+                            "line": line_num,
+                            "column": col
+                        })
+                    elif word in ['number', 'string', 'bool']:
+                        tokens.append({
+                            "type": "TYPE",
+                            "value": word,
+                            "line": line_num,
+                            "column": col
+                        })
+                    elif word.replace('.', '').isdigit():
+                        tokens.append({
+                            "type": "NUMBER",
+                            "value": word,
+                            "line": line_num,
+                            "column": col
+                        })
+                    elif word.startswith('"') and word.endswith('"'):
+                        tokens.append({
+                            "type": "STRING",
+                            "value": word,
+                            "line": line_num,
+                            "column": col
+                        })
+                    elif word in ['=', '+', '-', '*', '/', '(', ')', '{', '}', ':', ',']:
+                        tokens.append({
+                            "type": "OPERATOR",
+                            "value": word,
+                            "line": line_num,
+                            "column": col
+                        })
+                    else:
+                        tokens.append({
+                            "type": "IDENTIFIER",
+                            "value": word,
+                            "line": line_num,
+                            "column": col
+                        })
+                    col += len(word) + 1
+            
+            return tokens
     
     def get_symbols_table(self, code_id: str) -> Optional[Dict]:
         """
-        Gera tabela de símbolos
+        Gera tabela de símbolos do código MiniPar
         """
         source_code = self.get_code(code_id)
         if not source_code:
             return None
         
-        # Placeholder para tabela de símbolos
-        return {
-            "global_scope": {
-                "functions": [
-                    {
-                        "name": "main",
-                        "type": "function",
-                        "return_type": "int",
-                        "parameters": [],
-                        "line": 1
-                    }
-                ],
-                "variables": []
-            },
-            "function_scopes": {
-                "main": {
-                    "variables": [],
-                    "parameters": []
-                }
+        try:
+            # Usa o compilador MiniPar para gerar tabela de símbolos
+            symbols = self.minipar_compiler.get_symbols_table(source_code)
+            return symbols
+        except Exception as e:
+            # Análise básica em caso de erro
+            symbols = {
+                "variables": [],
+                "functions": [],
+                "error": str(e)
             }
-        }
+            
+            # Busca por declarações de variáveis
+            lines = source_code.split('\n')
+            for line_num, line in enumerate(lines, 1):
+                line = line.strip()
+                if line.startswith('var '):
+                    parts = line.split()
+                    if len(parts) >= 4:
+                        var_name = parts[1].rstrip(':')
+                        var_type = parts[2]
+                        symbols["variables"].append({
+                            "name": var_name,
+                            "type": var_type,
+                            "line": line_num,
+                            "scope": "global"
+                        })
+                elif line.startswith('func '):
+                    func_name = line.split('(')[0].replace('func ', '').strip()
+                    symbols["functions"].append({
+                        "name": func_name,
+                        "line": line_num,
+                        "scope": "global"
+                    })
+            
+            return symbols
     
     def get_complexity_analysis(self, code_id: str) -> Optional[Dict]:
         """
