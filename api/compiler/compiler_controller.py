@@ -47,43 +47,6 @@ class CompilationResponse(BaseModel):
     llvm_ir: str = Field(..., description="Código LLVM IR gerado")
 
 
-@router.get("/optimization-levels",
-           summary="📋 Níveis de Otimização Disponíveis",
-           description="""
-           **Lista todos os níveis de otimização disponíveis na API**
-           
-           Use estes valores nos endpoints `/llvm/ir/opt/{opt_level}` e `/asm/opt/{opt_level}`
-           """,
-           responses={
-               200: {"description": "✅ Lista de níveis de otimização"}
-           })
-async def get_optimization_levels():
-    """📋 **Níveis de Otimização** - Lista todos os níveis disponíveis"""
-    levels = []
-    for level in OptLevel:
-        levels.append({
-            "level": level.value,
-            "description": {
-                "O0": "Sem otimização, debug completo",
-                "O1": "Otimização básica, equilibra velocidade e debug",
-                "O2": "Otimização padrão, melhor performance sem quebrar debug", 
-                "O3": "Otimização máxima, pode sacrificar debug"
-            }[level.value]
-        })
-    
-    return {
-        "optimization_levels": levels,
-        "usage": {
-            "llvm_ir": "/compiler/{code_id}/llvm/ir/opt/{opt_level}",
-            "assembly": "/compiler/{code_id}/asm/opt/{opt_level}"
-        },
-        "examples": [
-            "http://localhost:8000/compiler/your_code_id/llvm/ir/opt/O2",
-            "http://localhost:8000/compiler/your_code_id/asm/opt/O3"
-        ]
-    }
-
-
 @router.post("/upload", 
             response_model=CodeResponse,
             summary="📝 Upload de Código",
@@ -121,6 +84,43 @@ async def upload_code(request: CodeUploadRequest):
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.get("/optimization-levels",
+           summary="📋 Níveis de Otimização Disponíveis",
+           description="""
+           **Lista todos os níveis de otimização disponíveis na API**
+           
+           Use estes valores nos endpoints `/llvm/ir/opt/{opt_level}` e `/asm/opt/{opt_level}`
+           """,
+           responses={
+               200: {"description": "✅ Lista de níveis de otimização"}
+           })
+async def get_optimization_levels():
+    """📋 **Níveis de Otimização** - Lista todos os níveis disponíveis"""
+    levels = []
+    for level in OptLevel:
+        levels.append({
+            "level": level.value,
+            "description": {
+                "O0": "Sem otimização, debug completo",
+                "O1": "Otimização básica, equilibra velocidade e debug",
+                "O2": "Otimização padrão, melhor performance sem quebrar debug", 
+                "O3": "Otimização máxima, pode sacrificar debug"
+            }[level.value]
+        })
+    
+    return {
+        "optimization_levels": levels,
+        "usage": {
+            "llvm_ir": "/compiler/{code_id}/llvm/ir/opt/{opt_level}",
+            "assembly": "/compiler/{code_id}/asm/opt/{opt_level}"
+        },
+        "examples": [
+            "http://localhost:8000/compiler/your_code_id/llvm/ir/opt/O2",
+            "http://localhost:8000/compiler/your_code_id/asm/opt/O3"
+        ]
+    }
 
 
 @router.get("/{code_id}",
