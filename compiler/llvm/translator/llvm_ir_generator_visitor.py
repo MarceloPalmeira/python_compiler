@@ -158,10 +158,10 @@ class LLVMIRGeneratorVisitor(ParserGrammarVisitor):
         if tipo_ctx.tipobase():
             tipo_text = tipo_ctx.tipobase().getText()
             type_map = {
-                'int': 'i32',
-                'float': 'float',
-                'char': 'i8',
-                'boolean': 'i1'
+                'number': 'double',
+                'bool': 'i1',
+                'string': 'i8*',
+                'void': 'void'
             }
             return type_map.get(tipo_text, 'i32')
         return 'i32'

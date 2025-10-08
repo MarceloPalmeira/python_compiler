@@ -58,11 +58,12 @@ class CompilationResponse(BaseModel):
             2. 🆔 Armazenado com ID único
             3. ⚙️ Compilado para verificar erros
             
-            **Linguagem suportada:**
-            - Sintaxe similar ao C
-            - Tipos: `int`, `float`, `char`, `boolean`
-            - Funções, loops, condicionais
-            - Arrays e operações matemáticas
+            **Linguagem suportada: MiniPar 2025.1**
+            - Sintaxe moderna: `var nome: tipo = valor`
+            - Tipos: `number`, `bool`, `string`, `list`, `dict`, `void`, `any`
+            - Funções: `func nome(param: tipo) -> tipo { ... }`
+            - Estruturas: `if/else`, `while`, `for`, `par` (paralelo)
+            - Built-ins: `print()`, `input()`, `sleep()`
             """,
             responses={
                 200: {"description": "✅ Upload realizado com sucesso"},

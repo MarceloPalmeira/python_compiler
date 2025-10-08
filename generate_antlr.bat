@@ -1,6 +1,6 @@
 @echo off
 REM Script to generate ANTLR Python files for Windows
-REM Supports both original (C-like) and MiniPar grammars
+REM Supports both original (legacy) and MiniPar grammars
 REM Make sure you have antlr4-tools installed: pip install antlr4-tools
 
 echo ==========================================
@@ -9,7 +9,7 @@ echo ==========================================
 
 cd grammar
 
-REM Generate Python files from original grammar (C-like syntax)
+REM Generate Python files from original grammar (legacy syntax)
 echo Generating original grammar files...
 antlr4 -Dlanguage=Python3 -visitor -listener LexerGrammar.g4 ParserGrammar.g4
 

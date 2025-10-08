@@ -29,8 +29,8 @@ python_compiler/
 ├── main.py                  # CLI principal 
 ├── setup.sh / setup.bat     # Scripts de instalação
 ├── grammar/                 # Gramáticas ANTLR4 e MiniPar
-│   ├── LexerGrammar.g4      # Lexer original (C-like)
-│   ├── ParserGrammar.g4     # Parser original (C-like)
+│   ├── LexerGrammar.g4      # Lexer original (legacy)
+│   ├── ParserGrammar.g4     # Parser original (legacy)
 │   ├── LexerGrammarMinipar.g4  # Lexer MiniPar oficial
 │   └── ParserGrammarMinipar.g4 # Parser MiniPar oficial
 ├── compiler/                # Módulo do compilador
@@ -226,7 +226,7 @@ print("Array ordenado:", ordenado)
 - [x] **CLI com Click** - Interface de linha de comando
 - [x] **API REST com FastAPI** - Interface web completa
 - [x] **Sistema de cache** - Armazenamento de códigos compilados
-- [x] **Gramáticas ANTLR4** - MiniPar oficial + C-like
+- [x] **Gramáticas ANTLR4** - MiniPar oficial + legacy
 - [x] **Scripts de setup** - Instalação automática
 - [x] **Tabela de símbolos** - Análise de escopo e declarações
 - [x] **Análise de complexidade** - Métricas algorítmicas

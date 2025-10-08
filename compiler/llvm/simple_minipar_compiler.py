@@ -615,7 +615,7 @@ class SimpleMiniparCompiler:
         """Tokenize a single line"""
         tokens = []
         
-        # Define token patterns
+        # Define token patterns (order matters - more specific first)
         patterns = [
             (r'#.*', 'COMMENT'),
             (r'/\*.*?\*/', 'BLOCK_COMMENT'),
@@ -627,10 +627,23 @@ class SimpleMiniparCompiler:
             (r'\b\d+\b', 'INTEGER'),
             (r'"[^"]*"', 'STRING'),
             (r'\b[a-zA-Z_][a-zA-Z0-9_]*\b', 'IDENTIFIER'),
-            (r'&&|\|\|', 'LOGICAL_OP'),
-            (r'==|!=|<=|>=|<|>', 'RELATIONAL_OP'),
+            # Multi-character operators first (order is critical)
+            (r'&&', 'LOGICAL_OP'),
+            (r'\|\|', 'LOGICAL_OP'),
+            (r'==', 'RELATIONAL_OP'),
+            (r'!=', 'RELATIONAL_OP'),
+            (r'<=', 'RELATIONAL_OP'),
+            (r'>=', 'RELATIONAL_OP'),
             (r'->', 'ARROW'),
-            (r'[+\-*/=%]', 'ARITHMETIC_OP'),
+            # Single character operators
+            (r'<', 'RELATIONAL_OP'),
+            (r'>', 'RELATIONAL_OP'),
+            (r'\+', 'ARITHMETIC_OP'),
+            (r'-', 'ARITHMETIC_OP'),
+            (r'\*', 'ARITHMETIC_OP'),
+            (r'/', 'ARITHMETIC_OP'),
+            (r'%', 'ARITHMETIC_OP'),
+            (r'=', 'ARITHMETIC_OP'),
             (r'[(){}[\],;:.]', 'DELIMITER'),
             (r'\s+', 'WHITESPACE')
         ]
