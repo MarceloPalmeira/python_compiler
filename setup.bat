@@ -1,14 +1,15 @@
 @echo off
-REM Setup script for Python Compiler (Windows)
+REM Setup script for MiniPar Compiler (Windows)
 
-echo ===================================
-echo Setting up Python Compiler Project
-echo ===================================
+echo =============================================
+echo Setting up MiniPar Compiler Project 2025.1
+echo =============================================
 
 REM Check Python version
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Error: Python is not installed or not in PATH
+    echo Please install Python 3.8+ and add to PATH
     pause
     exit /b 1
 )
@@ -32,31 +33,37 @@ REM Install requirements
 echo Installing Python dependencies...
 pip install -r requirements.txt
 
-REM Install ANTLR4 tools
-echo Installing ANTLR4 tools...
-pip install antlr4-tools
-
-REM Generate ANTLR files
-echo Generating ANTLR Python files...
+REM Generate ANTLR files (optional - using SimpleMiniparCompiler as primary)
+echo Generating ANTLR files (optional)...
 call generate_antlr.bat
 
 echo.
-echo =====================================
-echo Setup completed successfully!
-echo =====================================
+echo ===============================================
+echo MiniPar Compiler Setup completed successfully!
+echo ===============================================
 echo.
-echo To use the compiler:
+echo To use the MiniPar compiler:
+echo.
 echo 1. Activate the virtual environment:
 echo    venv\Scripts\activate.bat
 echo.
-echo 2. Run the CLI:
-echo    python main.py compiler --help
+echo 2. Run CLI with MiniPar code:
+echo    python main.py compiler exemplo.minipar
 echo.
-echo 3. Start the API:
+echo 3. Start the API server:
+echo    python run_api.py
+echo    or
 echo    python main.py api
 echo.
-echo 4. Test with example:
-echo    python main.py compiler test_simple.txt
+echo 4. Test with MiniPar examples:
+echo    python main.py compiler test_minipar.minipar
+echo    python comprehensive_test.py
+echo.
+echo 5. API Documentation:
+echo    http://localhost:8000/docs
+echo.
+echo 6. CPULator ARM Emulator:
+echo    https://cpulator.01xz.net/?sys=arm
 echo.
 echo Deactivate virtual environment when done:
 echo    deactivate
