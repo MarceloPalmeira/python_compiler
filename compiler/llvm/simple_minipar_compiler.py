@@ -622,7 +622,7 @@ class SimpleMiniparCompiler:
             (r'\b(var|func|if|else|while|for|return|break|continue|par|seq)\b', 'KEYWORD'),
             (r'\b(number|bool|string|list|dict|void|any)\b', 'TYPE'),
             (r'\b(true|false)\b', 'BOOLEAN'),
-            (r'\b(print|input|len|sleep)\b', 'BUILTIN'),
+            (r'\b(print|input|len|sleep|to_string)\b', 'BUILTIN'),
             (r'\b\d+\.\d+\b', 'FLOAT'),
             (r'\b\d+\b', 'INTEGER'),
             (r'"[^"]*"', 'STRING'),
