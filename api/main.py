@@ -16,7 +16,7 @@ from .compiler.compiler_controller import router as compiler_router
 app = FastAPI(
     title="Projeto Compiladores MiniPar - API",
     description="""
-    🚀 **Compilador MiniPar para LLVM IR**
+    **Compilador MiniPar para LLVM IR**
     
     Esta API permite compilar código da linguagem **MiniPar** para LLVM IR e realizar várias análises.
     
@@ -32,13 +32,13 @@ app = FastAPI(
     
     ## Funcionalidades
     
-    * **📝 Compilação**: Converte código MiniPar para LLVM IR
-    * **🔍 Análise Sintática**: Gera árvore sintática do código
-    * **🏷️ Tokens**: Lista todos os tokens lexicais
-    * **📊 Símbolos**: Tabela de símbolos e escopo
-    * **📈 Complexidade**: Análise de complexidade algorítmica
-    * **⚡ Otimização**: Diferentes níveis de otimização LLVM
-    * **🔧 Assembly ARM**: Geração de código assembly para CPULator
+    * **Compilação**: Converte código MiniPar para LLVM IR
+    * **Análise Sintática**: Gera árvore sintática do código
+    * **Tokens**: Lista todos os tokens lexicais
+    * **Símbolos**: Tabela de símbolos e escopo
+    * **Complexidade**: Análise de complexidade algorítmica
+    * **Otimização**: Diferentes níveis de otimização LLVM
+    * **Assembly ARM**: Geração de código assembly para CPULator
     
     ## Como usar
     
@@ -75,11 +75,11 @@ app = FastAPI(
     openapi_tags=[
         {
             "name": "compiler",
-            "description": "🔧 Operações de compilação e análise de código",
+            "description": "Operações de compilação e análise de código",
         },
         {
             "name": "health",
-            "description": "🏥 Verificação de saúde da API",
+            "description": "Verificação de saúde da API",
         }
     ]
 )
@@ -98,9 +98,9 @@ app.include_router(compiler_router, prefix="/compiler", tags=["compiler"])
 
 @app.get("/", tags=["health"])
 async def root():
-    """🏠 **Root endpoint** - Informações básicas da API"""
+    """Root endpoint - Informações básicas da API"""
     return {
-        "message": "🚀 Projeto Compiladores MiniPar - Python API",
+        "message": "Projeto Compiladores MiniPar - Python API",
         "version": "0.0.1",
         "language": "MiniPar",
         "docs": "/docs",
@@ -108,22 +108,22 @@ async def root():
         "redoc": "/redoc",
         "openapi": "/openapi.json",
         "features": [
-            "📝 Compilação MiniPar para LLVM IR",
-            "🔍 Análise sintática",
-            "🏷️ Análise lexical",
-            "📊 Tabela de símbolos",
-            "📈 Análise de complexidade",
-            "⚡ Otimização LLVM",
-            "🔧 Geração de assembly ARM para CPULator"
+            "Compilação MiniPar para LLVM IR",
+            "Análise sintática",
+            "Análise lexical",
+            "Tabela de símbolos",
+            "Análise de complexidade",
+            "Otimização LLVM",
+            "Geração de assembly ARM para CPULator"
         ]
     }
 
 
 @app.get("/health", tags=["health"])
 async def health():
-    """🏥 **Health check** - Verifica se a API está funcionando"""
+    """Health check - Verifica se a API está funcionando"""
     return {
-        "status": "✅ healthy",
+        "status": "healthy",
         "service": "Compilador",
         "timestamp": "2025-10-06",
         "features_available": True

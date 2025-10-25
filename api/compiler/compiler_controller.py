@@ -19,7 +19,7 @@ router = APIRouter()
 
 # Request/Response models
 class CodeUploadRequest(BaseModel):
-    """📝 Modelo para upload de código MiniPar"""
+    """Modelo para upload de código MiniPar"""
     code: str = Field(
         ..., 
         description="Código fonte MiniPar para compilar",
@@ -39,24 +39,24 @@ print("Total:", total)"""
     )
 
 class CodeResponse(BaseModel):
-    """🆔 Resposta com ID do código"""
+    """Resposta com ID do código"""
     code_id: str = Field(..., description="ID único gerado para o código", example="a1b2c3d4e5f6")
 
 class CompilationResponse(BaseModel):
-    """⚙️ Resposta de compilação"""
+    """Resposta de compilação"""
     llvm_ir: str = Field(..., description="Código LLVM IR gerado")
 
 
 @router.post("/upload", 
             response_model=CodeResponse,
-            summary="📝 Upload de Código",
+            summary="Upload de Código",
             description="""
             **Faz upload do código fonte e retorna um ID único.**
             
             O código será:
-            1. ✅ Validado sintaticamente
-            2. 🆔 Armazenado com ID único
-            3. ⚙️ Compilado para verificar erros
+            1. Validado sintaticamente
+            2. Armazenado com ID único
+            3. Compilado para verificar erros
             
             **Linguagem suportada: MiniPar 2025.1**
             - Sintaxe moderna: `var nome: tipo = valor`
@@ -66,11 +66,11 @@ class CompilationResponse(BaseModel):
             - Built-ins: `print()`, `input()`, `sleep()`
             """,
             responses={
-                200: {"description": "✅ Upload realizado com sucesso"},
-                400: {"description": "❌ Erro de compilação ou sintaxe"}
+                200: {"description": "Upload realizado com sucesso"},
+                400: {"description": "Erro de compilação ou sintaxe"}
             })
 async def upload_code(request: CodeUploadRequest):
-    """📤 **Upload código fonte** - Envia código e recebe ID único"""
+    """Upload código fonte - Envia código e recebe ID único"""
     try:
         code_trimmed = request.code.strip()
         print(f"Received code upload request: {len(code_trimmed)} characters")
@@ -88,17 +88,17 @@ async def upload_code(request: CodeUploadRequest):
 
 
 @router.get("/optimization-levels",
-           summary="📋 Níveis de Otimização Disponíveis",
+           summary="Níveis de Otimização Disponíveis",
            description="""
            **Lista todos os níveis de otimização disponíveis na API**
            
            Use estes valores nos endpoints `/llvm/ir/opt/{opt_level}` e `/asm/opt/{opt_level}`
            """,
            responses={
-               200: {"description": "✅ Lista de níveis de otimização"}
+               200: {"description": "Lista de níveis de otimização"}
            })
 async def get_optimization_levels():
-    """📋 **Níveis de Otimização** - Lista todos os níveis disponíveis"""
+    """**Níveis de Otimização** - Lista todos os níveis disponíveis"""
     levels = []
     for level in OptLevel:
         levels.append({
@@ -125,11 +125,11 @@ async def get_optimization_levels():
 
 
 @router.get("/{code_id}",
-           summary="📄 Obter Código Original",
+           summary="Obter Código Original",
            description="**Retorna apenas o código fonte original - copy/paste direto**",
            responses={
-               200: {"description": "✅ Código fonte puro"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Código fonte puro"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_code(code_id: str):
     """📖 **Código original** - Recupera código fonte pelo ID"""
@@ -143,24 +143,24 @@ async def get_code(code_id: str):
 
 
 @router.get("/{code_id}/llvm/ir",
-           summary="⚙️ Compilar para LLVM IR",
+           summary="⚙Compilar para LLVM IR",
            description="""
            **Compila o código para LLVM IR (Intermediate Representation)**
            
            O LLVM IR é uma linguagem intermediária que pode ser:
-           - 🔧 Otimizada pelo LLVM
+           - Otimizada pelo LLVM
            - 📦 Compilada para código de máquina
            - 🔄 Convertida para assembly
            
            **Retorna apenas o código LLVM IR para copy/paste direto**
            """,
            responses={
-               200: {"description": "✅ Código LLVM IR puro"},
-               404: {"description": "❌ Código não encontrado"},
+               200: {"description": "Código LLVM IR puro"},
+               404: {"description": "Código não encontrado"},
                500: {"description": "🚫 Erro de compilação"}
            })
 async def get_llvm_ir_code(code_id: str):
-    """⚙️ **LLVM IR** - Compila código para LLVM Intermediate Representation"""
+    """⚙**LLVM IR** - Compila código para LLVM Intermediate Representation"""
     try:
         llvm_ir = compiler_service.compile_to_llvm_ir(code_id)
         if llvm_ir is None:
@@ -185,9 +185,9 @@ async def get_llvm_ir_code(code_id: str):
            **Retorna apenas o código LLVM IR otimizado para copy/paste direto**
            """,
            responses={
-               200: {"description": "✅ Código LLVM IR otimizado puro"},
-               400: {"description": "❌ Nível de otimização inválido"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Código LLVM IR otimizado puro"},
+               400: {"description": "Nível de otimização inválido"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_llvm_code_optimized(
     code_id: str, 
@@ -233,15 +233,15 @@ async def get_llvm_code_optimized(
 
 
 @router.get("/{code_id}/asm",
-           summary="🔧 Código Assembly ARM",
+           summary="Código Assembly ARM",
            description="""
            **Gera código assembly ARM compatível com CPULator**
            
            **Retorna apenas o código assembly puro para copy/paste direto no CPULator**
            """,
            responses={
-               200: {"description": "✅ Código assembly ARM puro"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Código assembly ARM puro"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_asm_code(code_id: str):
     """Get ARM assembly code compatible with CPULator"""
@@ -347,7 +347,7 @@ def _generate_cpulator_arm_assembly(code: str) -> str:
 
 
 @router.get("/{code_id}/asm/opt/{opt_level}",
-           summary="🔧 Assembly Otimizado", 
+           summary="Assembly Otimizado", 
            description="""
            **Gera código assembly com otimização específica**
            
@@ -361,9 +361,9 @@ def _generate_cpulator_arm_assembly(code: str) -> str:
            **Retorna apenas o código assembly otimizado para copy/paste direto**
            """,
            responses={
-               200: {"description": "✅ Código assembly otimizado puro"},
-               400: {"description": "❌ Nível de otimização inválido"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Código assembly otimizado puro"},
+               400: {"description": "Nível de otimização inválido"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_asm_code_optimized(
     code_id: str, 
@@ -374,7 +374,7 @@ async def get_asm_code_optimized(
         regex="^(O0|O1|O2|O3)$"
     )
 ):
-    """🔧 **Assembly Otimizado** - Gera código assembly com otimizações específicas"""
+    """**Assembly Otimizado** - Gera código assembly com otimizações específicas"""
     try:
         # Valida nível de otimização
         opt_level_enum = OptLevel.from_string(opt_level)
@@ -442,8 +442,8 @@ _start:
            summary="🌳 Árvore Sintática",
            description="**Retorna apenas a árvore sintática - copy/paste direto**",
            responses={
-               200: {"description": "✅ Árvore sintática pura"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Árvore sintática pura"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_syntax_tree(code_id: str):
     """Get syntax tree representation"""
@@ -457,11 +457,11 @@ async def get_syntax_tree(code_id: str):
 
 
 @router.get("/{code_id}/token",
-           summary="🎯 Lista de Tokens",
+           summary="Lista de Tokens",
            description="**Retorna apenas a lista de tokens - copy/paste direto**",
            responses={
-               200: {"description": "✅ Lista de tokens pura"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Lista de tokens pura"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_token_list(code_id: str):
     """Get token list representation"""
@@ -475,11 +475,11 @@ async def get_token_list(code_id: str):
 
 
 @router.get("/{code_id}/symbols",
-           summary="📋 Tabela de Símbolos",
+           summary="Tabela de Símbolos",
            description="**Retorna apenas a tabela de símbolos - copy/paste direto**",
            responses={
-               200: {"description": "✅ Tabela de símbolos pura"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Tabela de símbolos pura"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_symbols_table(code_id: str):
     """Get symbols table"""
@@ -493,11 +493,11 @@ async def get_symbols_table(code_id: str):
 
 
 @router.get("/{code_id}/complexity",
-           summary="📊 Análise de Complexidade",
+           summary="Análise de Complexidade",
            description="**Retorna apenas a análise de complexidade - copy/paste direto**",
            responses={
-               200: {"description": "✅ Análise de complexidade pura"},
-               404: {"description": "❌ Código não encontrado"}
+               200: {"description": "Análise de complexidade pura"},
+               404: {"description": "Código não encontrado"}
            })
 async def get_complexity_analysis(code_id: str):
     """Get complexity analysis"""
