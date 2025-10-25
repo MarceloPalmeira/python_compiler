@@ -1,5 +1,0 @@
-# Simple MiniPar program for CPULator ARM testing
-var a: number = 42
-var b: number = 13
-var result: number = a + b
-print("Resultado:", result)

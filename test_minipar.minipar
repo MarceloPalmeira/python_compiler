@@ -1,3 +1,0 @@
-var x: number = 10
-var y: number = 20
-print("Result:", x + y)
