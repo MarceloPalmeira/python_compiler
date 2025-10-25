@@ -1,14 +1,14 @@
 # Projeto Compiladores MiniPar 2025.1
 
-## 🎯 Tema 1: Compilador MiniPar com Geração de Código Intermediário e Assembly ARM
+## Tema 1: Compilador MiniPar com Geração de Código Intermediário e Assembly ARM
 
 Este projeto implementa um **compilador completo** para a linguagem **MiniPar 2025.1** com:
-- ✅ **Análise Léxica (Lexer)** - Tokenização completa
-- ✅ **Análise Sintática (Parser)** - Geração de AST
-- ✅ **Código Intermediário** - LLVM IR (equivalente a código de três endereços)
-- ✅ **Assembly ARM** - Compatível com CPULator (https://cpulator.01xz.net/?sys=arm)
+- **Análise Léxica (Lexer)** - Tokenização completa
+- **Análise Sintática (Parser)** - Geração de AST
+- **Código Intermediário** - LLVM IR (equivalente a código de três endereços)
+- **Assembly ARM** - Compatível com CPULator (https://cpulator.01xz.net/?sys=arm)
 
-## 🚀 Setup Rápido
+## Setup
 
 ### Windows
 ```batch
@@ -21,7 +21,7 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 python_compiler/
@@ -47,7 +47,7 @@ python_compiler/
 └── minipar/              # Especificação oficial MiniPar (referência)
 ```
 
-## 🛠️ Instalação Manual
+## Instalação Manual
 
 ### Pré-requisitos
 - Python 3.8+
@@ -95,39 +95,13 @@ chmod +x generate_antlr.sh
 ./generate_antlr.sh
 ```
 
-## 🎯 Uso
-
-### CLI (Interface de Linha de Comando)
-
-```bash
-# Ajuda
-python main.py --help
-python main.py compiler --help
-
-# Compilar arquivo MiniPar
-python main.py compiler exemplo.minipar
-
-# Compilar e salvar saída LLVM IR
-python main.py compiler exemplo.minipar -o output.ll
-
-# Modo interativo
-python main.py compiler
-
-# Mostrar árvore sintática
-python main.py compiler exemplo.minipar -t
-```
+## Uso
 
 ### API REST
 
 ```bash
 # Iniciar servidor
 python run_api.py
-
-# Ou com main.py
-python main.py api
-
-# Com opções personalizadas
-python main.py api --host 0.0.0.0 --port 8080 --reload
 ```
 
 A API estará disponível em:
@@ -135,24 +109,21 @@ A API estará disponível em:
 - **Documentação**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
-### Endpoints da API
+### Endpoints Principais
 
-```
-GET  /                           # Documentação principal
-GET  /health                     # Status do servidor
-POST /compiler/upload            # Upload de código MiniPar
-GET  /compiler/{code_id}         # Obter código original
-GET  /compiler/{code_id}/llvm/ir # Obter LLVM IR (código intermediário)
-GET  /compiler/{code_id}/llvm/ir/opt/{level} # LLVM IR otimizado
-GET  /compiler/{code_id}/asm     # Assembly ARM para CPULator
-GET  /compiler/{code_id}/asm/opt/{level}     # Assembly otimizado
-GET  /compiler/{code_id}/syntax  # Árvore sintática (AST)
-GET  /compiler/{code_id}/token   # Lista de tokens (análise léxica)
-GET  /compiler/{code_id}/symbols # Tabela de símbolos
-GET  /compiler/{code_id}/complexity # Análise de complexidade
-```
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/` | GET | Documentação da API |
+| `/health` | GET | Status do servidor |
+| `/compiler/upload` | POST | Upload de código MiniPar |
+| `/compiler/{code_id}` | GET | Código fonte original |
+| `/compiler/{code_id}/llvm/ir` | GET | LLVM IR (código intermediário) |
+| `/compiler/{code_id}/asm` | GET | Assembly ARM para CPULator |
+| `/compiler/{code_id}/syntax` | GET | Árvore sintática (AST) |
+| `/compiler/{code_id}/token` | GET | Lista de tokens |
+| `/compiler/{code_id}/symbols` | GET | Tabela de símbolos |
 
-## 📝 Exemplos de Código MiniPar
+## Exemplos de Código MiniPar
 
 ### Programa Simples
 ```minipar
@@ -215,72 +186,68 @@ var ordenado: list = quicksort(dados)
 print("Array ordenado:", ordenado)
 ```
 
-## 🔧 Estado de Implementação
+## Estado de Implementação
 
-### ✅ Completamente Implementado
-- [x] **Compilador MiniPar completo** (SimpleMiniparCompiler)
-- [x] **Análise Léxica** - Tokenização de todos os tokens MiniPar
-- [x] **Análise Sintática** - Parser com geração de AST
-- [x] **Código Intermediário** - LLVM IR (equivale a código de 3 endereços)
-- [x] **Assembly ARM** - Compatível com CPULator
-- [x] **CLI com Click** - Interface de linha de comando
-- [x] **API REST com FastAPI** - Interface web completa
-- [x] **Sistema de cache** - Armazenamento de códigos compilados
-- [x] **Gramáticas ANTLR4** - MiniPar oficial + legacy
-- [x] **Scripts de setup** - Instalação automática
-- [x] **Tabela de símbolos** - Análise de escopo e declarações
-- [x] **Análise de complexidade** - Métricas algorítmicas
+### Completamente Implementado
+- **Compilador MiniPar completo** (SimpleMiniparCompiler)
+- **Análise Léxica** - Tokenização de todos os tokens MiniPar
+- **Análise Sintática** - Parser com geração de AST
+- **Código Intermediário** - LLVM IR (equivale a código de 3 endereços)
+- **Assembly ARM** - Compatível com CPULator
+- **API REST com FastAPI** - Interface web completa
+- **Sistema de cache** - Armazenamento de códigos compilados
+- **Gramáticas ANTLR4** - MiniPar oficial + legacy
+- **Scripts de setup** - Instalação automática
+- **Tabela de símbolos** - Análise de escopo e declarações
+- **Análise de complexidade** - Métricas algorítmicas
 
-### 🎯 Recursos MiniPar Suportados
-- [x] **Tipos**: `number`, `bool`, `string`, `list`, `dict`, `void`, `any`
-- [x] **Variáveis**: `var nome: tipo = valor`
-- [x] **Funções**: `func nome(param: tipo) -> tipo { ... }`
-- [x] **Estruturas de controle**: `if/else`, `while`, `for`
-- [x] **Operadores**: Aritméticos, lógicos (`&&`, `||`), relacionais
-- [x] **Arrays**: `[1, 2, 3]`, indexação `array[0]`
-- [x] **Built-ins**: `print()`, `input()`, `len()`, `sleep()`
-- [x] **Comentários**: `#` (linha) e `/* */` (bloco)
-- [x] **Recursão**: Chamadas recursivas de função
-- [x] **Canais**: `s_channel`, `c_channel` (reconhecidos)
+### Recursos MiniPar Suportados
+- **Tipos**: `number`, `bool`, `string`, `list`, `dict`, `void`, `any`
+- **Variáveis**: `var nome: tipo = valor`
+- **Funções**: `func nome(param: tipo) -> tipo { ... }`
+- **Estruturas de controle**: `if/else`, `while`, `for`
+- **Operadores**: Aritméticos, lógicos (`&&`, `||`), relacionais
+- **Arrays**: `[1, 2, 3]`, indexação `array[0]`
+- **Built-ins**: `print()`, `input()`, `len()`, `sleep()`
+- **Comentários**: `#` (linha) e `/* */` (bloco)
+- **Recursão**: Chamadas recursivas de função
+- **Canais**: `s_channel`, `c_channel` (reconhecidos)
 
-### 🏆 Conformidade com Tema 1
-- ✅ **Compilador não Orientado a Objetos**: MiniPar funcional
-- ✅ **Geração de Código Intermediário**: LLVM IR (3-endereços)
-- ✅ **Geração de Assembly ARM**: CPULator compatível
-- ✅ **Linguagem MiniPar 2025.1**: Especificação oficial
+### Conformidade com Tema 1
+- **Compilador não Orientado a Objetos**: MiniPar funcional
+- **Geração de Código Intermediário**: LLVM IR (3-endereços)
+- **Geração de Assembly ARM**: CPULator compatível
+- **Linguagem MiniPar 2025.1**: Especificação oficial
 
-## 🧪 Testes e Exemplos
+## Testes e Exemplos
 
 ### Executar Testes Completos
 ```bash
-# Teste do compilador CLI
-python main.py compiler test_minipar.minipar
-
-# Teste da API completa
-python test_complete_api.py
-
 # Teste de conformidade final
-python comprehensive_test.py
+python test_compatibility.py
 
-# Teste do fluxo Lexer → Parser → AST
-python test_flow.py
+# Teste de features avançadas
+python test_advanced_features.py
+
+# Verificação dos requisitos
+python verify_requirements.py
 ```
 
 ### Resultados Esperados
 ```
-🧪 TESTING OFFICIAL MINIPAR FACTORIAL EXAMPLE
+TESTING OFFICIAL MINIPAR FACTORIAL EXAMPLE
 ============================================================
-✅ Code uploaded successfully - ID: d3f062b82c15343a
-✅ LLVM IR (Three-Address Code): WORKING
-✅ Tokenization (58 tokens): WORKING  
-✅ Syntax Tree (AST): WORKING
-✅ Symbols Table: WORKING
-✅ ARM Assembly for CPULator: WORKING
+Code uploaded successfully - ID: d3f062b82c15343a
+LLVM IR (Three-Address Code): WORKING
+Tokenization (58 tokens): WORKING  
+Syntax Tree (AST): WORKING
+Symbols Table: WORKING
+ARM Assembly for CPULator: WORKING
 ============================================================
-🎯 ALL TESTS PASSED: 100% SUCCESS RATE
+ALL TESTS PASSED: 100% SUCCESS RATE
 ```
 
-## 🌐 CPULator Integration
+## CPULator Integration
 
 O assembly gerado é **100% compatível** com o emulador CPULator:
 
@@ -315,7 +282,7 @@ _start:
 output_msg: .ascii "MiniPar Output\n"
 ```
 
-## 🤝 Equivalências Java → Python
+## Equivalências Java - Python
 
 | Java | Python | Uso no Projeto |
 |------|--------|----------------|
@@ -328,7 +295,7 @@ output_msg: .ascii "MiniPar Output\n"
 | Optional | Optional (typing) | Valores opcionais |
 | ANTLR4 | antlr4-python3-runtime | Geração de parsers |
 
-## 📊 Arquitetura do Compilador
+## Arquitetura do Compilador
 
 ```
 ┌─────────────────┐    ┌──────────────┐    ┌─────────────┐
@@ -353,40 +320,39 @@ output_msg: .ascii "MiniPar Output\n"
 └─────────────────┘
 ```
 
-## 🔗 Links Úteis
+## Links Úteis
 
 - **CPULator ARM Emulator**: https://cpulator.01xz.net/?sys=arm
 - **ANTLR4 Documentation**: https://github.com/antlr/antlr4
 - **FastAPI Documentation**: https://fastapi.tiangolo.com
 - **LLVM IR Reference**: https://llvm.org/docs/LangRef.html
 
-## 🎓 Entrega Acadêmica
+## Entrega Acadêmica
 
 Este projeto atende **100%** aos requisitos do **Tema 1**:
 
-### ✅ Checklist de Entrega
-- [x] **Compilador funcional** para linguagem MiniPar
-- [x] **Análise Léxica** completa
-- [x] **Análise Sintática** com AST
-- [x] **Código Intermediário** (LLVM IR = 3-endereços)
-- [x] **Assembly ARM** para CPULator
-- [x] **Interface CLI** funcional
-- [x] **Interface API** REST completa
-- [x] **Documentação** técnica
-- [x] **Testes** de conformidade
-- [x] **Exemplos** funcionais
+### Checklist de Entrega
+- **Compilador funcional** para linguagem MiniPar
+- **Análise Léxica** completa
+- **Análise Sintática** com AST
+- **Código Intermediário** (LLVM IR = 3-endereços)
+- **Assembly ARM** para CPULator
+- **Interface API** REST completa
+- **Documentação** técnica
+- **Testes** de conformidade
+- **Exemplos** funcionais
 
-### 📝 Arquivos de Entrega
+### Arquivos de Entrega
 ```
-📦 Entrega/
-├── 📄 RELATORIO_FINAL.md        # Relatório técnico completo
-├── 📁 python_compiler/          # Código fonte completo
-├── 📁 exemplos/                # Códigos MiniPar de teste
-├── 📄 README.md                # Este arquivo
-└── 🎥 demonstracao.mp4         # (Opcional) Vídeo demo
+Entrega/
+├── RELATORIO_FINAL.md        # Relatório técnico completo
+├── python_compiler/          # Código fonte completo
+├── exemplos/                # Códigos MiniPar de teste
+├── README.md                # Este arquivo
+└── demonstracao.mp4         # (Opcional) Vídeo demo
 ```
 
-## 🐞 Solução de Problemas
+## Solução de Problemas
 
 ### Erro "ANTLR files not found"
 Execute o script de geração:
@@ -408,7 +374,7 @@ Reinstale as dependências:
 pip install -r requirements.txt
 ```
 
-## 🤝 Contribuição
+## Contribuição
 
 1. Mantenha a estrutura equivalente ao projeto Java
 2. Use type hints em Python
