@@ -165,6 +165,9 @@ cache/
 # ANTLR generated files (optional - you might want to regenerate these)
 compiler/generated/
 
+# MiniPar reference implementation (local only)
+minipar/
+
 # IDE specific files
 .vscode/
 .idea/
