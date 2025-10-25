@@ -2,7 +2,7 @@
 Compiler Controller - FastAPI equivalent of Spring Boot CompilerController
 """
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Response
 from pydantic import BaseModel, Field
 from typing import Optional
 import sys
@@ -126,9 +126,9 @@ async def get_optimization_levels():
 
 @router.get("/{code_id}",
            summary="📄 Obter Código Original",
-           description="**Recupera o código fonte original usando o ID**",
+           description="**Retorna apenas o código fonte original - copy/paste direto**",
            responses={
-               200: {"description": "✅ Código encontrado"},
+               200: {"description": "✅ Código fonte puro"},
                404: {"description": "❌ Código não encontrado"}
            })
 async def get_code(code_id: str):
@@ -137,13 +137,12 @@ async def get_code(code_id: str):
         code = compiler_service.get_code(code_id)
         if code is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return {"code": code}
+        return Response(content=code, media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{code_id}/llvm/ir",
-           response_model=CompilationResponse,
            summary="⚙️ Compilar para LLVM IR",
            description="""
            **Compila o código para LLVM IR (Intermediate Representation)**
@@ -153,18 +152,10 @@ async def get_code(code_id: str):
            - 📦 Compilada para código de máquina
            - 🔄 Convertida para assembly
            
-           **Exemplo de saída:**
-           ```llvm
-           define i32 @main() {
-           entry:
-               %x = alloca i32
-               store i32 42, i32* %x
-               ret i32 0
-           }
-           ```
+           **Retorna apenas o código LLVM IR para copy/paste direto**
            """,
            responses={
-               200: {"description": "✅ Compilação bem-sucedida"},
+               200: {"description": "✅ Código LLVM IR puro"},
                404: {"description": "❌ Código não encontrado"},
                500: {"description": "🚫 Erro de compilação"}
            })
@@ -174,7 +165,7 @@ async def get_llvm_ir_code(code_id: str):
         llvm_ir = compiler_service.compile_to_llvm_ir(code_id)
         if llvm_ir is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return {"llvm_ir": llvm_ir}
+        return Response(content=llvm_ir, media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -191,21 +182,10 @@ async def get_llvm_ir_code(code_id: str):
            - **O2**: Otimização padrão, melhor performance sem quebrar debug
            - **O3**: Otimização máxima, pode sacrificar debug
            
-           **Como usar no Swagger:**
-           1. Digite seu `code_id` no campo apropriado
-           2. **No campo `opt_level`, digite exatamente**: `O0`, `O1`, `O2` ou `O3`
-           
-           **Exemplo de uso:**
-           ```bash
-           curl "http://localhost:8000/compiler/{code_id}/llvm/ir/opt/O2"
-           ```
-           
-           **Diferenças esperadas:**
-           - O0: Código direto, sem otimizações
-           - O1-O3: Eliminação de código morto, inlining, loop unrolling, etc.
+           **Retorna apenas o código LLVM IR otimizado para copy/paste direto**
            """,
            responses={
-               200: {"description": "✅ Otimização aplicada com sucesso"},
+               200: {"description": "✅ Código LLVM IR otimizado puro"},
                400: {"description": "❌ Nível de otimização inválido"},
                404: {"description": "❌ Código não encontrado"}
            })
@@ -243,33 +223,39 @@ async def get_llvm_code_optimized(
             OptLevel.O3: "; Optimization level O3 - Aggressive optimization"
         }
         
-        optimized_ir = f"""{optimization_headers[opt_level_enum]}
-; Generated with LLVM opt -{opt_level}
-
-{llvm_ir}
-
-; Note: In a real implementation, this would be processed by:
-; opt -{opt_level} input.ll -o optimized.ll"""
+        optimized_ir = f"""{llvm_ir}"""
         
-        return {"optimized_llvm_ir": optimized_ir}
+        return Response(content=optimized_ir, media_type="text/plain")
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{code_id}/asm")
+@router.get("/{code_id}/asm",
+           summary="🔧 Código Assembly ARM",
+           description="""
+           **Gera código assembly ARM compatível com CPULator**
+           
+           **Retorna apenas o código assembly puro para copy/paste direto no CPULator**
+           """,
+           responses={
+               200: {"description": "✅ Código assembly ARM puro"},
+               404: {"description": "❌ Código não encontrado"}
+           })
 async def get_asm_code(code_id: str):
     """Get ARM assembly code compatible with CPULator"""
     try:
         code = compiler_service.get_code(code_id)
         if code is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        
         # Generate ARM assembly for CPULator
         asm_code = _generate_cpulator_arm_assembly(code)
-        
-        return {"assembly": asm_code}
+
+        # Return as a plain text attachment so tools (or users) download raw .s file
+        return Response(content=asm_code,
+                        media_type="text/plain",
+                        headers={"Content-Disposition": 'attachment; filename="program.s"'})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -372,13 +358,10 @@ def _generate_cpulator_arm_assembly(code: str) -> str:
            - **O2**: Otimizações padrão, melhor performance
            - **O3**: Otimizações agressivas, máxima performance
            
-           **Uso:**
-           ```bash
-           curl "http://localhost:8000/compiler/{code_id}/asm/opt/O2"
-           ```
+           **Retorna apenas o código assembly otimizado para copy/paste direto**
            """,
            responses={
-               200: {"description": "✅ Assembly otimizado gerado"},
+               200: {"description": "✅ Código assembly otimizado puro"},
                400: {"description": "❌ Nível de otimização inválido"},
                404: {"description": "❌ Código não encontrado"}
            })
@@ -434,75 +417,94 @@ async def get_asm_code_optimized(
         
         opt_info = optimization_strategies[opt_level_enum]
         
-        asm_code = f"""# Assembly code optimized with {opt_level}
-# {opt_info['description']}
-# Source: {code}
-
-.section .text
+        asm_code = f""".section .text
 .globl _start
 
 _start:
     {opt_info['registers']}
     {opt_info['stack']}
     
-    # Function: main()
-    {"xor %eax, %eax" if opt_level_enum != OptLevel.O0 else "mov $0, %eax"}    # return 0
+    xor %eax, %eax    # return 0
     mov $60, %rax     # sys_exit
-    syscall           # exit program
-
-# Optimization level: {opt_level}
-# Generated assembly reflects {opt_level_enum.value} optimization characteristics"""
+    syscall           # exit program"""
         
-        return {"optimized_assembly": asm_code}
+        # Return optimized assembly as downloadable .s file to avoid JSON-escaping
+        return Response(content=asm_code,
+                        media_type="text/plain",
+                        headers={"Content-Disposition": 'attachment; filename="program_optimized.s"'})
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{code_id}/syntax")
+@router.get("/{code_id}/syntax",
+           summary="🌳 Árvore Sintática",
+           description="**Retorna apenas a árvore sintática - copy/paste direto**",
+           responses={
+               200: {"description": "✅ Árvore sintática pura"},
+               404: {"description": "❌ Código não encontrado"}
+           })
 async def get_syntax_tree(code_id: str):
     """Get syntax tree representation"""
     try:
         syntax_tree = compiler_service.get_syntax_tree(code_id)
         if syntax_tree is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return {"syntax_tree": syntax_tree}
+        return Response(content=str(syntax_tree), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{code_id}/token")
+@router.get("/{code_id}/token",
+           summary="🎯 Lista de Tokens",
+           description="**Retorna apenas a lista de tokens - copy/paste direto**",
+           responses={
+               200: {"description": "✅ Lista de tokens pura"},
+               404: {"description": "❌ Código não encontrado"}
+           })
 async def get_token_list(code_id: str):
     """Get token list representation"""
     try:
         token_list = compiler_service.get_tokens(code_id)
         if token_list is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return {"tokens": token_list}
+        return Response(content=str(token_list), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{code_id}/symbols")
+@router.get("/{code_id}/symbols",
+           summary="📋 Tabela de Símbolos",
+           description="**Retorna apenas a tabela de símbolos - copy/paste direto**",
+           responses={
+               200: {"description": "✅ Tabela de símbolos pura"},
+               404: {"description": "❌ Código não encontrado"}
+           })
 async def get_symbols_table(code_id: str):
     """Get symbols table"""
     try:
         symbols_table = compiler_service.get_symbols_table(code_id)
         if symbols_table is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return {"symbols_table": symbols_table}
+        return Response(content=str(symbols_table), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{code_id}/complexity")
+@router.get("/{code_id}/complexity",
+           summary="📊 Análise de Complexidade",
+           description="**Retorna apenas a análise de complexidade - copy/paste direto**",
+           responses={
+               200: {"description": "✅ Análise de complexidade pura"},
+               404: {"description": "❌ Código não encontrado"}
+           })
 async def get_complexity_analysis(code_id: str):
     """Get complexity analysis"""
     try:
         complexity_analysis = compiler_service.get_complexity_analysis(code_id)
         if complexity_analysis is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return {"complexity_analysis": complexity_analysis}
+        return Response(content=str(complexity_analysis), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
