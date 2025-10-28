@@ -143,7 +143,7 @@ async def get_code(code_id: str):
 
 
 @router.get("/{code_id}/llvm/ir",
-           summary="⚙Compilar para LLVM IR",
+           summary="Compilar para LLVM IR",
            description="""
            **Compila o código para LLVM IR (Intermediate Representation)**
            
