@@ -149,15 +149,15 @@ async def get_code(code_id: str):
            
            O LLVM IR é uma linguagem intermediária que pode ser:
            - Otimizada pelo LLVM
-           - 📦 Compilada para código de máquina
-           - 🔄 Convertida para assembly
+           - Compilada para código de máquina
+           - Convertida para assembly
            
            **Retorna apenas o código LLVM IR para copy/paste direto**
            """,
            responses={
                200: {"description": "Código LLVM IR puro"},
                404: {"description": "Código não encontrado"},
-               500: {"description": "🚫 Erro de compilação"}
+               500: {"description": "Erro de compilação"}
            })
 async def get_llvm_ir_code(code_id: str):
     """⚙**LLVM IR** - Compila código para LLVM Intermediate Representation"""
@@ -171,7 +171,7 @@ async def get_llvm_ir_code(code_id: str):
 
 
 @router.get("/{code_id}/llvm/ir/opt/{opt_level}",
-           summary="⚡ LLVM IR Otimizado",
+           summary="LLVM IR Otimizado",
            description="""
            **Compila código para LLVM IR com otimização específica**
            
@@ -198,7 +198,7 @@ async def get_llvm_code_optimized(
         regex="^(O0|O1|O2|O3)$"
     )
 ):
-    """⚡ **LLVM IR Otimizado** - Aplica otimizações específicas ao código LLVM"""
+    """**LLVM IR Otimizado** - Aplica otimizações específicas ao código LLVM"""
     try:
         # Valida o nível de otimização
         opt_level_enum = OptLevel.from_string(opt_level)
@@ -439,7 +439,7 @@ _start:
 
 
 @router.get("/{code_id}/syntax",
-           summary="🌳 Árvore Sintática",
+           summary="Árvore Sintática",
            description="**Retorna apenas a árvore sintática - copy/paste direto**",
            responses={
                200: {"description": "Árvore sintática pura"},
