@@ -212,26 +212,5 @@ entry:
             
             return symbols
     
-    def get_complexity_analysis(self, code_id: str) -> Optional[Dict]:
-        """
-        Gera análise de complexidade
-        """
-        source_code = self.get_code(code_id)
-        if not source_code:
-            return None
-        
-        # Placeholder para análise de complexidade
-        return {
-            "time_complexity": "O(1)",
-            "space_complexity": "O(1)",
-            "analysis": {
-                "loops": 0,
-                "recursive_calls": 0,
-                "function_calls": 0,
-                "conditional_statements": 0
-            },
-            "details": "Programa simples com função main que retorna constante."
-        }
-
 # Instância global do serviço
 compiler_service = CompilerService()

@@ -490,21 +490,3 @@ async def get_symbols_table(code_id: str):
         return Response(content=str(symbols_table), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/{code_id}/complexity",
-           summary="Análise de Complexidade",
-           description="**Retorna apenas a análise de complexidade - copy/paste direto**",
-           responses={
-               200: {"description": "Análise de complexidade pura"},
-               404: {"description": "Código não encontrado"}
-           })
-async def get_complexity_analysis(code_id: str):
-    """Get complexity analysis"""
-    try:
-        complexity_analysis = compiler_service.get_complexity_analysis(code_id)
-        if complexity_analysis is None:
-            raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return Response(content=str(complexity_analysis), media_type="text/plain")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))

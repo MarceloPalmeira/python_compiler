@@ -330,29 +330,3 @@ class SymbolsTableService:
             return symbols_table
         except Exception as e:
             raise Exception(f"Symbols table generation failed: {e}")
-
-
-class ComplexityAnalysisService:
-    """Complexity analysis service"""
-    
-    def __init__(self, code_cache_manager: CodeCacheManager):
-        self.code_cache_manager = code_cache_manager
-        self._cache: Dict[str, str] = {}
-    
-    def get_complexity_analysis(self, code_id: str) -> Optional[str]:
-        """Get complexity analysis"""
-        if code_id in self._cache:
-            return self._cache[code_id]
-        
-        code = self.code_cache_manager.load_code_from_id(code_id)
-        if code is None:
-            return None
-        
-        try:
-            # Placeholder implementation
-            complexity_analysis = f"Complexity analysis for code ID: {code_id}\n(Implementation pending - requires complexity analyzer)"
-            
-            self._cache[code_id] = complexity_analysis
-            return complexity_analysis
-        except Exception as e:
-            raise Exception(f"Complexity analysis failed: {e}")

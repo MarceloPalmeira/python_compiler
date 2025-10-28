@@ -57,7 +57,6 @@
   - `GET /compiler/{id}/syntax` - Árvore sintática
   - `GET /compiler/{id}/token` - Lista de tokens
   - `GET /compiler/{id}/symbols` - Tabela de símbolos
-  - `GET /compiler/{id}/complexity` - Análise de complexidade
 
 ### 🧪 TESTES REALIZADOS
 
