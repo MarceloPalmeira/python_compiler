@@ -60,12 +60,12 @@ async def root():
         "redoc": "/redoc",
         "openapi": "/openapi.json",
         "features": [
-            "Compilação MiniPar para LLVM IR",
+            "Compilação MiniPar para TAC (three-address code)",
             "Análise sintática",
             "Análise lexical",
             "Tabela de símbolos",
             "Análise de complexidade",
-            "Otimização LLVM",
+            "Otimização do TAC",
             "Geração de assembly ARM para CPULator"
         ]
     }

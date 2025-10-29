@@ -1,3 +1,0 @@
-"""
-LLVM Translator module
-"""
