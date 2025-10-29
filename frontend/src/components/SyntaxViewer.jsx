@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TreePine, Download, FileJson } from 'lucide-react';
+import { TreePine, Download, FileJson, Loader2, AlertCircle } from 'lucide-react';
 
-function SyntaxViewer({ syntaxTree, codeId }) {
+function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
   const downloadSyntaxTree = () => {
     const data = typeof syntaxTree === 'string' ? syntaxTree : JSON.stringify(syntaxTree, null, 2);
     const blob = new Blob([data], { type: 'text/plain' });
@@ -14,6 +14,45 @@ function SyntaxViewer({ syntaxTree, codeId }) {
     URL.revokeObjectURL(url);
   };
 
+  // Estado de loading
+  if (loading) {
+    return (
+      <div className="text-center py-20">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+        >
+          <Loader2 className="w-16 h-16 text-apple-blue mx-auto mb-4" />
+        </motion.div>
+        <h3 className="text-xl font-semibold text-apple-gray-800 mb-2">
+          Carregando Árvore Sintática
+        </h3>
+        <p className="text-apple-gray-500">
+          Aguarde enquanto processamos o código...
+        </p>
+      </div>
+    );
+  }
+
+  // Estado de erro
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-apple-gray-800 mb-2">
+          Erro ao Carregar Árvore Sintática
+        </h3>
+        <p className="text-red-600 mb-4">
+          {error}
+        </p>
+        <p className="text-sm text-apple-gray-500">
+          Verifique se o código foi compilado corretamente
+        </p>
+      </div>
+    );
+  }
+
+  // Sem dados
   if (!syntaxTree) {
     return (
       <div className="text-center py-20">

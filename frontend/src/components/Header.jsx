@@ -1,24 +1,31 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Code2, Sparkles } from 'lucide-react';
 
 function Header() {
+  const navItems = [
+    { path: '/', label: '📝 Editor', exact: true },
+    { path: '/lexical', label: '🏷️ Análise Léxica' },
+    { path: '/syntax', label: '🌳 Análise Sintática' },
+    { path: '/llvm', label: '⚙️ LLVM -> Geração de Código Intermediário' },
+    { path: '/assembly', label: '💻 Assembly -> Geração de Código de Máquina' },
+    { path: '/optimization', label: '⚡ Otimização' },
+  ];
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-apple-gray-200/50"
+      className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b border-apple-gray-50"
     >
-      <div className="container mx-auto px-4 py-5 max-w-7xl">
-        <div className="flex items-center justify-between">
-          <motion.div 
-            className="flex items-center gap-3"
-            whileHover={{ scale: 1.02 }}
-          >
+      <div className="container mx-auto px-4 py-3 max-w-7xl">
+        <div className="flex items-center justify-between mb-3">
+          <NavLink to="/" className="flex items-center gap-3 group">
             <div className="relative">
               <div className="absolute inset-0 bg-apple-blue rounded-2xl blur-lg opacity-30 animate-pulse-soft"></div>
-              <div className="relative bg-gradient-to-br from-apple-blue to-blue-600 p-3 rounded-2xl">
+              <div className="relative bg-gradient-to-br from-apple-blue to-blue-600 p-3 rounded-2xl group-hover:scale-105 transition-transform">
                 <Code2 className="w-7 h-7 text-white" />
               </div>
             </div>
@@ -28,10 +35,9 @@ function Header() {
               </h1>
               <p className="text-sm text-apple-gray-500 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
-                Análise Léxica e Sintática
               </p>
             </div>
-          </motion.div>
+          </NavLink>
 
           <div className="flex items-center gap-4">
             <motion.a
@@ -55,6 +61,27 @@ function Header() {
             </motion.div>
           </div>
         </div>
+
+        {/* Navigation */}
+        <nav className="flex gap-2 overflow-x-auto pb-1">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.exact}
+              className={({ isActive }) => `
+                px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap
+                transition-all duration-200
+                ${isActive
+                  ? 'bg-apple-blue text-cyan-800 shadow-xl'
+                  : 'text-apple-gray-600 hover:bg-apple-gray-100'
+                }
+              `}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
       </div>
     </motion.header>
   );
