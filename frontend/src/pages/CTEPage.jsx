@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCodeContext } from '../contexts/CodeContext';
-import TACViewer from '../components/TACViewer';
+import CTEViewer from '../components/CTEViewer';
 import compilerAPI from '../services/api';
 
 function CTEPage() {
@@ -50,7 +50,7 @@ function CTEPage() {
       transition={{ duration: 0.5 }}
       className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden p-6"
     >
-      <TACViewer
+      <CTEViewer
         tacCode={tacCode}
         codeId={currentCodeId}
         loading={tacLoading}
