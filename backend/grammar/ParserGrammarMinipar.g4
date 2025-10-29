@@ -1,7 +1,7 @@
 parser grammar ParserGrammarMinipar;
 options { tokenVocab=LexerGrammarMinipar; }
 
-// Programa principal - sequência de declarações e comandos
+// Programa principal
 programa
     : (declaracao | comando)* EOF
     ;
@@ -12,17 +12,17 @@ declaracao
     | comando
     ;
 
-// Declaração de variável: var nome (: tipo)? (= valor)? ;
+// Declaração de variável
 declaracao_variavel
     : VAR ID (COLON ID)? (ASSIGN expressao)? SEMICOLON?
     ;
 
-// Declaração de função: func nome(param, ...) (-> tipo)? { ... }
+// Declaração de função
 declaracao_funcao
     : FUNC ID LPAREN parametros? RPAREN (ARROW ID)? bloco
     ;
 
-// Parâmetros de função (sem tipos explícitos implementados)
+// Parâmetros de função
 parametros
     : ID (COLON ID)? (COMMA ID (COLON ID)?)*
     ;
@@ -54,12 +54,12 @@ comando_bloco
     | for_statement
     ;
 
-// Bloco paralelo: par { ... }
+// Bloco paralelo
 bloco_paralelo
     : PAR bloco
     ;
 
-// Atribuição: variavel = expressao
+// Atribuição
 atribuicao
     : ID ASSIGN expressao
     ;
@@ -74,7 +74,7 @@ while_statement
     : WHILE LPAREN expressao RPAREN bloco
     ;
 
-// Laço for (implementação simples)
+// Laço for
 for_statement
     : FOR LPAREN VAR ID (COLON ID)? IN expressao RPAREN bloco
     ;
@@ -88,7 +88,7 @@ argumentos
     : expressao (COMMA expressao)*
     ;
 
-// Expressões - hierarquia implementada
+// Expressões
 expressao
     : expr_ou
     ;

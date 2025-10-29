@@ -16,57 +16,52 @@ SEQ : 'seq';
 TRUE : 'true';
 FALSE : 'false';
 
-// Funções built-in (apenas print implementado)
+// Funções built-in implementadas
 PRINT : 'print' ;
 
-// Operadores e símbolos
-COMMA : ',' ;
-SEMICOLON : ';' ;
-COLON : ':' ;
-ARROW : '->' ;
+// Operadores relacionais
+GTE : '>=' ;
+LTE : '<=' ;
+EQ : '==' ;
+NEQ : '!=' ;
+GT : '>' ;
+LT : '<' ;
 
-LPAREN : '(';
-RPAREN : ')';
+// Operadores lógicos
+AND : '&&' ;
+OR : '||' ;
+NOT : '!' ;
 
-LBRACKET : '[';
-RBRACKET : ']';
-
-LBRACE : '{';
-RBRACE : '}';
-
-// Strings
-STRING : '"' (~["\r\n])* '"' ;
-
-// Operadores aritméticos (implementados como OP regex)
+// Operadores aritméticos
 OP_PLUS : '+' ;
 OP_MINUS : '-' ;
 OP_MULT : '*' ;
 OP_DIV : '/' ;
 OP_MOD : '%' ;
 
-// Operadores lógicos
-NOT : '!' ;
-AND : '&&' ;
-OR : '||' ;
-
-// Operadores relacionais
-EQ : '==' ;
-NEQ : '!=' ;
-GTE : '>=' ;
-LTE : '<=' ;
-GT : '>';
-LT : '<' ;
-
-// Atribuição
+// Atribuição e setas
 ASSIGN : '=' ;
+ARROW : '->' ;
+
+// Símbolos e pontuação
+LPAREN : '(' ;
+RPAREN : ')' ;
+LBRACE : '{' ;
+RBRACE : '}' ;
+LBRACKET : '[' ;
+RBRACKET : ']' ;
+COMMA : ',' ;
+SEMICOLON : ';' ;
+COLON : ':' ;
 
 // Literais
-NUMBER : [0-9]+ ('.' [0-9]+)? ;  // Implementado como NUMBER regex
+STRING : '"' (~["\r\n])* '"' ;
+NUMBER : [0-9]+ ('.' [0-9]+)? ;
 
 // Identificadores
 ID: [a-zA-Z_][a-zA-Z_0-9]* ;
 
-// Comentários (implementado como COMMENT regex)
+// Comentários
 COMMENT: '#' ~[\r\n]* -> skip ;
 
 // Whitespace
