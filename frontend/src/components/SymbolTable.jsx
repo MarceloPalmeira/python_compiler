@@ -1,6 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GitBranch, Hash, Tag, Download, Search, Loader2, AlertCircle } from 'lucide-react';
+import {
+  GitBranch,
+  Hash,
+  Tag,
+  Download,
+  Search,
+  Loader2,
+  AlertCircle,
+} from 'lucide-react';
 
 function SymbolTable({ symbols, codeId, loading, error }) {
   const [search, setSearch] = useState('');
@@ -16,7 +24,11 @@ function SymbolTable({ symbols, codeId, loading, error }) {
     if (!q) return { variables, functions };
     return {
       variables: variables.filter((v) => String(v).toLowerCase().includes(q)),
-      functions: functions.filter((f) => f.name.toLowerCase().includes(q) || f.params?.some((p) => String(p).toLowerCase().includes(q))),
+      functions: functions.filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) ||
+          f.params?.some((p) => String(p).toLowerCase().includes(q)),
+      ),
     };
   }, [variables, functions, search]);
 
@@ -38,10 +50,15 @@ function SymbolTable({ symbols, codeId, loading, error }) {
         animate={{ opacity: 1 }}
         className="text-center py-16 bg-gradient-to-br from-amber-50 to-sky-50 rounded-2xl border border-apple-gray-200"
       >
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        >
           <Loader2 className="w-12 h-12 text-apple-gray-400 mx-auto mb-4" />
         </motion.div>
-        <div className="text-apple-gray-700 font-medium">Carregando Tabela de Símbolos…</div>
+        <div className="text-apple-gray-700 font-medium">
+          Carregando Tabela de Símbolos…
+        </div>
       </motion.div>
     );
   }
@@ -54,7 +71,9 @@ function SymbolTable({ symbols, codeId, loading, error }) {
         className="text-center py-16 bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl border border-red-200"
       >
         <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-        <div className="text-red-700 font-semibold mb-1">Erro ao carregar símbolos</div>
+        <div className="text-red-700 font-semibold mb-1">
+          Erro ao carregar símbolos
+        </div>
         <div className="text-red-600 text-sm">{error}</div>
       </motion.div>
     );
@@ -68,8 +87,12 @@ function SymbolTable({ symbols, codeId, loading, error }) {
         className="text-center py-16 bg-gradient-to-br from-slate-50 to-gray-100 rounded-2xl border border-slate-200"
       >
         <GitBranch className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-        <div className="text-apple-gray-700 font-medium">Sem símbolos ainda</div>
-        <div className="text-apple-gray-500 text-sm">Compile o código para gerar a tabela</div>
+        <div className="text-apple-gray-700 font-medium">
+          Sem símbolos ainda
+        </div>
+        <div className="text-apple-gray-500 text-sm">
+          Compile o código para gerar a tabela
+        </div>
       </motion.div>
     );
   }
@@ -78,8 +101,12 @@ function SymbolTable({ symbols, codeId, loading, error }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-apple-gray-800 mb-1">Tabela de Símbolos</h2>
-          <p className="text-sm text-apple-gray-500">Panorama de variáveis e funções globais</p>
+          <h2 className="text-2xl font-bold text-apple-gray-800 mb-1">
+            Tabela de Símbolos
+          </h2>
+          <p className="text-sm text-apple-gray-500">
+            Panorama de variáveis e funções globais
+          </p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -92,8 +119,18 @@ function SymbolTable({ symbols, codeId, loading, error }) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={<Tag className="w-4 h-4" />} label="Variáveis" value={variables.length} color="amber" />
-        <StatCard icon={<Hash className="w-4 h-4" />} label="Funções" value={functions.length} color="cyan" />
+        <StatCard
+          icon={<Tag className="w-4 h-4" />}
+          label="Variáveis"
+          value={variables.length}
+          color="amber"
+        />
+        <StatCard
+          icon={<Hash className="w-4 h-4" />}
+          label="Funções"
+          value={functions.length}
+          color="cyan"
+        />
       </div>
 
       <div className="relative">
@@ -107,19 +144,29 @@ function SymbolTable({ symbols, codeId, loading, error }) {
         />
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-apple-gray-200 apple-shadow overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-2xl border border-apple-gray-200 apple-shadow overflow-hidden"
+      >
         <div className="bg-gradient-to-r from-amber-50 via-apple-gray-50 to-cyan-50 px-6 py-4 border-b border-apple-gray-200 flex items-center gap-3">
           <GitBranch className="w-5 h-5 text-amber-600" />
-          <span className="text-sm font-semibold text-apple-gray-800">Símbolos Globais</span>
+          <span className="text-sm font-semibold text-apple-gray-800">
+            Símbolos Globais
+          </span>
         </div>
 
         <div className="p-6 space-y-8">
           <section>
-            <h3 className="text-xs font-semibold text-amber-800 mb-3">Variáveis</h3>
+            <h3 className="text-xs font-semibold text-amber-800 mb-3">
+              Variáveis
+            </h3>
             <AnimatePresence mode="popLayout">
               <div className="flex flex-wrap gap-2">
                 {filtered.variables.length === 0 && (
-                  <span className="text-apple-gray-500 text-sm">Nenhuma variável</span>
+                  <span className="text-apple-gray-500 text-sm">
+                    Nenhuma variável
+                  </span>
                 )}
                 {filtered.variables.map((name, idx) => (
                   <motion.span
@@ -138,11 +185,15 @@ function SymbolTable({ symbols, codeId, loading, error }) {
           </section>
 
           <section>
-            <h3 className="text-xs font-semibold text-cyan-800 mb-3">Funções</h3>
+            <h3 className="text-xs font-semibold text-cyan-800 mb-3">
+              Funções
+            </h3>
             <div className="grid md:grid-cols-2 gap-3">
               <AnimatePresence>
                 {filtered.functions.length === 0 && (
-                  <span className="text-apple-gray-500 text-sm">Nenhuma função</span>
+                  <span className="text-apple-gray-500 text-sm">
+                    Nenhuma função
+                  </span>
                 )}
                 {filtered.functions.map((fn, idx) => (
                   <motion.div
@@ -154,15 +205,21 @@ function SymbolTable({ symbols, codeId, loading, error }) {
                     className="rounded-xl border border-cyan-200 bg-cyan-50/50 p-4"
                   >
                     <div className="flex items-baseline justify-between gap-2 mb-2">
-                      <div className="text-apple-gray-800 font-semibold truncate">{fn.name}</div>
+                      <div className="text-apple-gray-800 font-semibold truncate">
+                        {fn.name}
+                      </div>
                       <span className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-cyan-200 text-cyan-700 font-medium">
-                        {fn.paramsCount} parâmetro{fn.paramsCount === 1 ? '' : 's'}
+                        {fn.paramsCount} parâmetro
+                        {fn.paramsCount === 1 ? '' : 's'}
                       </span>
                     </div>
                     {Array.isArray(fn.params) && fn.params.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {fn.params.map((p, i) => (
-                          <span key={`${fn.name}-p-${i}`} className="px-2 py-0.5 rounded-md text-[11px] border bg-white text-cyan-800 border-cyan-200">
+                          <span
+                            key={`${fn.name}-p-${i}`}
+                            className="px-2 py-0.5 rounded-md text-[11px] border bg-white text-cyan-800 border-cyan-200"
+                          >
                             {p}
                           </span>
                         ))}
@@ -176,12 +233,16 @@ function SymbolTable({ symbols, codeId, loading, error }) {
         </div>
       </motion.div>
 
-      {(filtered.variables.length === 0 && filtered.functions.length === 0) && (variables.length + functions.length > 0) && (
-        <div className="text-center py-8">
-          <Search className="w-10 h-10 text-apple-gray-300 mx-auto mb-2" />
-          <div className="text-apple-gray-500 text-sm">Nenhum símbolo encontrado para "{search}"</div>
-        </div>
-      )}
+      {filtered.variables.length === 0 &&
+        filtered.functions.length === 0 &&
+        variables.length + functions.length > 0 && (
+          <div className="text-center py-8">
+            <Search className="w-10 h-10 text-apple-gray-300 mx-auto mb-2" />
+            <div className="text-apple-gray-500 text-sm">
+              Nenhum símbolo encontrado para "{search}"
+            </div>
+          </div>
+        )}
     </div>
   );
 }
@@ -198,7 +259,11 @@ function StatCard({ icon, label, value, color }) {
       text: 'text-cyan-800',
       border: 'border-cyan-200',
     },
-  }[color] || { bg: 'bg-apple-gray-50', text: 'text-apple-gray-800', border: 'border-apple-gray-200' };
+  }[color] || {
+    bg: 'bg-apple-gray-50',
+    text: 'text-apple-gray-800',
+    border: 'border-apple-gray-200',
+  };
 
   return (
     <motion.div
@@ -206,12 +271,12 @@ function StatCard({ icon, label, value, color }) {
       animate={{ opacity: 1, y: 0 }}
       className={`rounded-xl p-4 border ${colorMap.bg} ${colorMap.text} ${colorMap.border}`}
     >
-      <div className="flex items-center gap-2 text-xs font-semibold mb-1">{icon} {label}</div>
+      <div className="flex items-center gap-2 text-xs font-semibold mb-1">
+        {icon} {label}
+      </div>
       <div className="text-2xl font-bold">{value}</div>
     </motion.div>
   );
 }
 
 export default SymbolTable;
-
-
