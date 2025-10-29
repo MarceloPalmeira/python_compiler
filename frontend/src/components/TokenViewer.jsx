@@ -137,7 +137,7 @@ function TokenViewer({ tokens, codeId }) {
           <table className="w-full">
             <thead className="bg-apple-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-apple-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-apple-gray-600 uppercase tracking-wider sticky left-0 z-20 bg-apple-gray-50">
                   <div className="flex items-center gap-2">
                     <Hash className="w-4 h-4" />
                     #
@@ -178,7 +178,7 @@ function TokenViewer({ tokens, codeId }) {
                       transition={{ delay: index * 0.02 }}
                       className="hover:bg-apple-gray-50 transition-colors"
                     >
-                      <td className="px-6 py-4 text-sm text-apple-gray-500">
+                      <td className="px-6 py-4 text-sm text-apple-gray-500 sticky left-0 z-10 bg-white border-r border-apple-gray-100">
                         {index + 1}
                       </td>
                       <td className="px-6 py-4">
