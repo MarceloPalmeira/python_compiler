@@ -6,15 +6,14 @@ import CodeStatus from './components/CodeStatus';
 import EditorPage from './pages/EditorPage';
 import LexicalPage from './pages/LexicalPage';
 import SyntaxPage from './pages/SyntaxPage';
-import LLVMPage from './pages/LLVMPage';
+import CTEPage from './pages/CTEPage';
 import AssemblyPage from './pages/AssemblyPage';
-import OptimizationPage from './pages/OptimizationPage';
 import { CodeProvider } from './contexts/CodeContext';
 
 function App() {
   return (
     <CodeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-apple-gray-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gray-300 from-apple-gray-50 via-white to-blue-50">
         <Header />
         
         <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -23,9 +22,8 @@ function App() {
             <Route path="/editor" element={<Navigate to="/" replace />} />
             <Route path="/lexical" element={<LexicalPage />} />
             <Route path="/syntax" element={<SyntaxPage />} />
-            <Route path="/llvm" element={<LLVMPage />} />
+            <Route path="/cte" element={<CTEPage />} />
             <Route path="/assembly" element={<AssemblyPage />} />
-            <Route path="/optimization" element={<OptimizationPage />} />
           </Routes>
 
           <motion.div

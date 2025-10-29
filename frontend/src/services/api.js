@@ -70,8 +70,16 @@ class CompilerAPI {
    */
   async getSyntaxTree(codeId) {
     try {
-      const response = await this.client.get(`/compiler/${codeId}/syntax`);
-      return response.data.syntax_tree;
+      const response = await this.client.get(`/compiler/${codeId}/syntax`, {
+        responseType: 'text',
+        transformResponse: [(data) => data],
+      });
+
+      if (typeof response.data === 'string') {
+        return response.data;
+      }
+
+      return response.data?.syntax_tree || '';
     } catch (error) {
       console.error('Erro ao obter árvore sintática:', error);
       throw new Error(
