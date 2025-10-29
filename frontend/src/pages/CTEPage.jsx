@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useCodeContext } from '../contexts/CodeContext';
 import { Code2 } from 'lucide-react';
 
-function LLVMPage() {
+function CTEPage() {
   const { currentCodeId } = useCodeContext();
   const [activeTab, setActiveTab] = useState('normal');
 
@@ -42,7 +42,7 @@ function LLVMPage() {
               : 'text-apple-gray-600 hover:bg-apple-gray-50'
           }`}
         >
-          LLVM IR Normal
+          CTE IR Normal
         </button>
         <button
           onClick={() => setActiveTab('optimized')}
@@ -52,7 +52,7 @@ function LLVMPage() {
               : 'text-apple-gray-600 hover:bg-apple-gray-50'
           }`}
         >
-          LLVM IR Otimizado
+          CTE IR Otimizado
         </button>
       </div>
 
@@ -61,7 +61,7 @@ function LLVMPage() {
         <div className="flex items-center gap-2 mb-4">
           <Code2 className="w-5 h-5 text-apple-gray-600" />
           <h2 className="text-xl font-semibold text-apple-gray-800">
-            {activeTab === 'normal' ? 'LLVM IR' : 'LLVM IR Otimizado'}
+            {activeTab === 'normal' ? 'CTE IR' : 'CTE IR Otimizado'}
           </h2>
         </div>
         
@@ -70,7 +70,7 @@ function LLVMPage() {
             🚧 Funcionalidade em desenvolvimento
           </p>
           <p className="text-sm text-apple-gray-500 mt-2">
-            Em breve você poderá visualizar o código LLVM IR aqui
+            Em breve você poderá visualizar o código CTE IR aqui
           </p>
         </div>
       </div>
@@ -78,5 +78,5 @@ function LLVMPage() {
   );
 }
 
-export default LLVMPage;
+export default CTEPage;
 
