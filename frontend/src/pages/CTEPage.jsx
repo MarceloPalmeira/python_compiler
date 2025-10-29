@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCodeContext } from '../contexts/CodeContext';
-import { Code2 } from 'lucide-react';
+import TACViewer from '../components/TACViewer';
+import compilerAPI from '../services/api';
 
 function CTEPage() {
   const { currentCodeId } = useCodeContext();
-  const [activeTab, setActiveTab] = useState('normal');
+  const [tacCode, setTacCode] = useState(null);
+  const [tacLoading, setTacLoading] = useState(false);
+  const [tacError, setTacError] = useState(null);
+
+  useEffect(() => {
+    if (!currentCodeId) {
+      setTacCode(null);
+      return;
+    }
+
+    setTacLoading(true);
+    setTacError(null);
+    
+    compilerAPI.getTAC(currentCodeId)
+      .then(setTacCode)
+      .catch(err => setTacError(err.message))
+      .finally(() => setTacLoading(false));
+  }, [currentCodeId]);
 
   if (!currentCodeId) {
     return (
@@ -30,50 +48,14 @@ function CTEPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden"
+      className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden p-6"
     >
-      {/* Tabs */}
-      <div className="flex border-b border-apple-gray-200">
-        <button
-          onClick={() => setActiveTab('normal')}
-          className={`flex-1 px-6 py-4 font-medium transition-colors ${
-            activeTab === 'normal'
-              ? 'bg-white text-apple-blue border-b-2 border-apple-blue'
-              : 'text-apple-gray-600 hover:bg-apple-gray-50'
-          }`}
-        >
-          CTE IR Normal
-        </button>
-        <button
-          onClick={() => setActiveTab('optimized')}
-          className={`flex-1 px-6 py-4 font-medium transition-colors ${
-            activeTab === 'optimized'
-              ? 'bg-white text-apple-blue border-b-2 border-apple-blue'
-              : 'text-apple-gray-600 hover:bg-apple-gray-50'
-          }`}
-        >
-          CTE IR Otimizado
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Code2 className="w-5 h-5 text-apple-gray-600" />
-          <h2 className="text-xl font-semibold text-apple-gray-800">
-            {activeTab === 'normal' ? 'CTE IR' : 'CTE IR Otimizado'}
-          </h2>
-        </div>
-        
-        <div className="bg-apple-gray-50 rounded-xl p-8 text-center">
-          <p className="text-apple-gray-600">
-            🚧 Funcionalidade em desenvolvimento
-          </p>
-          <p className="text-sm text-apple-gray-500 mt-2">
-            Em breve você poderá visualizar o código CTE IR aqui
-          </p>
-        </div>
-      </div>
+      <TACViewer
+        tacCode={tacCode}
+        codeId={currentCodeId}
+        loading={tacLoading}
+        error={tacError}
+      />
     </motion.div>
   );
 }

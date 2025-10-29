@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCodeContext } from '../contexts/CodeContext';
-import { Cpu } from 'lucide-react';
+import AssemblyViewer from '../components/AssemblyViewer';
+import compilerAPI from '../services/api';
 
 function AssemblyPage() {
   const { currentCodeId } = useCodeContext();
-  const [activeTab, setActiveTab] = useState('normal');
+  const [asmCode, setAsmCode] = useState(null);
+  const [asmLoading, setAsmLoading] = useState(false);
+  const [asmError, setAsmError] = useState(null);
+
+  useEffect(() => {
+    if (!currentCodeId) {
+      setAsmCode(null);
+      return;
+    }
+
+    setAsmLoading(true);
+    setAsmError(null);
+    
+    compilerAPI.getASM(currentCodeId)
+      .then(setAsmCode)
+      .catch(err => setAsmError(err.message))
+      .finally(() => setAsmLoading(false));
+  }, [currentCodeId]);
 
   if (!currentCodeId) {
     return (
@@ -30,50 +48,14 @@ function AssemblyPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden"
+      className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden p-6"
     >
-      {/* Tabs */}
-      <div className="flex border-b border-apple-gray-200">
-        <button
-          onClick={() => setActiveTab('normal')}
-          className={`flex-1 px-6 py-4 font-medium transition-colors ${
-            activeTab === 'normal'
-              ? 'bg-white text-apple-blue border-b-2 border-apple-blue'
-              : 'text-apple-gray-600 hover:bg-apple-gray-50'
-          }`}
-        >
-          Assembly Normal
-        </button>
-        <button
-          onClick={() => setActiveTab('optimized')}
-          className={`flex-1 px-6 py-4 font-medium transition-colors ${
-            activeTab === 'optimized'
-              ? 'bg-white text-apple-blue border-b-2 border-apple-blue'
-              : 'text-apple-gray-600 hover:bg-apple-gray-50'
-          }`}
-        >
-          Assembly Otimizado
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Cpu className="w-5 h-5 text-apple-gray-600" />
-          <h2 className="text-xl font-semibold text-apple-gray-800">
-            {activeTab === 'normal' ? 'Assembly' : 'Assembly Otimizado'}
-          </h2>
-        </div>
-        
-        <div className="bg-apple-gray-50 rounded-xl p-8 text-center">
-          <p className="text-apple-gray-600">
-            🚧 Funcionalidade em desenvolvimento
-          </p>
-          <p className="text-sm text-apple-gray-500 mt-2">
-            Em breve você poderá visualizar o código Assembly aqui
-          </p>
-        </div>
-      </div>
+      <AssemblyViewer
+        asmCode={asmCode}
+        codeId={currentCodeId}
+        loading={asmLoading}
+        error={asmError}
+      />
     </motion.div>
   );
 }

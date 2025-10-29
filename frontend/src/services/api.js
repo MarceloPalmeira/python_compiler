@@ -148,6 +148,56 @@ class CompilerAPI {
       );
     }
   }
+
+  /**
+   * Obtém o código TAC (Three-Address Code)
+   * @param {string} codeId - ID do código
+   * @returns {Promise<string>} - Código TAC
+   */
+  async getTAC(codeId) {
+    try {
+      const response = await this.client.get(`/compiler/${codeId}/tac`, {
+        responseType: 'text',
+        transformResponse: [(data) => data],
+      });
+
+      if (typeof response.data === 'string') {
+        return response.data;
+      }
+
+      return response.data?.tac || '';
+    } catch (error) {
+      console.error('Erro ao obter código TAC:', error);
+      throw new Error(
+        error.response?.data?.detail || 'Erro ao obter código TAC'
+      );
+    }
+  }
+
+  /**
+   * Obtém o código Assembly ARM
+   * @param {string} codeId - ID do código
+   * @returns {Promise<string>} - Código Assembly ARM
+   */
+  async getASM(codeId) {
+    try {
+      const response = await this.client.get(`/compiler/${codeId}/asm`, {
+        responseType: 'text',
+        transformResponse: [(data) => data],
+      });
+
+      if (typeof response.data === 'string') {
+        return response.data;
+      }
+
+      return response.data?.asm || '';
+    } catch (error) {
+      console.error('Erro ao obter código Assembly:', error);
+      throw new Error(
+        error.response?.data?.detail || 'Erro ao obter código Assembly'
+      );
+    }
+  }
 }
 
 export default new CompilerAPI();
