@@ -8,7 +8,6 @@ import LexicalPage from './pages/LexicalPage';
 import SyntaxPage from './pages/SyntaxPage';
 import CTEPage from './pages/CTEPage';
 import AssemblyPage from './pages/AssemblyPage';
-import OptimizationPage from './pages/OptimizationPage';
 import { CodeProvider } from './contexts/CodeContext';
 
 function App() {
@@ -25,7 +24,6 @@ function App() {
             <Route path="/syntax" element={<SyntaxPage />} />
             <Route path="/cte" element={<CTEPage />} />
             <Route path="/assembly" element={<AssemblyPage />} />
-            <Route path="/optimization" element={<OptimizationPage />} />
           </Routes>
 
           <motion.div

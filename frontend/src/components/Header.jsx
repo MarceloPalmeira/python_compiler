@@ -9,8 +9,7 @@ function Header() {
     { path: '/lexical', label: '🏷️ Análise Léxica' },
     { path: '/syntax', label: '🌳 Análise Sintática' },
     { path: '/cte', label: '⚙️ CTE -> Geração de Código Intermediário' },
-    { path: '/assembly', label: '💻 Assembly -> Geração de Código de Máquina' },
-    { path: '/optimization', label: '⚡ Otimização' },
+    { path: '/assembly', label: '💻 Assembly -> Geração de Código de Máquina' }
   ];
 
   return (
