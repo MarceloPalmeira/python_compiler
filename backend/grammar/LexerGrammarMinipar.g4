@@ -1,6 +1,6 @@
 lexer grammar LexerGrammarMinipar;
 
-// Palavras-chave
+// Palavras-chave implementadas
 VAR : 'var' ;
 FUNC : 'func' ;
 IF : 'if' ;
@@ -13,76 +13,61 @@ CONTINUE : 'continue';
 IN : 'in';
 PAR : 'par';
 SEQ : 'seq';
+TRUE : 'true';
+FALSE : 'false';
 
-// Tipos da linguagem MiniPar
-TIPO_NUMBER : 'number' ;
-TIPO_BOOL : 'bool' ;
-TIPO_STRING : 'string' ;
-TIPO_LIST : 'list' ;
-TIPO_DICT : 'dict' ;
-TIPO_VOID : 'void' ;
-TIPO_ANY : 'any' ;
-
-// Funções built-in
+// Funções built-in (apenas print implementado)
 PRINT : 'print' ;
-INPUT : 'input' ;
-SLEEP : 'sleep' ;
 
 // Operadores e símbolos
-VIRGULA : ',' ;
-PONTO_VIRGULA : ';' ;
-DOIS_PONTOS : ':' ;
+COMMA : ',' ;
+SEMICOLON : ';' ;
+COLON : ':' ;
 ARROW : '->' ;
 
-PARENTESE_ABRE : '(';
-PARENTESE_FECHA : ')';
+LPAREN : '(';
+RPAREN : ')';
 
-COLCHETE_ABRE : '[';
-COLCHETE_FECHA : ']';
+LBRACKET : '[';
+RBRACKET : ']';
 
-CHAVE_ABRE : '{';
-CHAVE_FECHA : '}';
-
-PONTO : '.' ;
+LBRACE : '{';
+RBRACE : '}';
 
 // Strings
 STRING : '"' (~["\r\n])* '"' ;
 
-// Operadores aritméticos
-SINAL_MAIS : '+' ;
-SINAL_MENOS : '-' ;
-OP_MULTIPLICACAO : '*' ;
-OP_DIVISAO : '/' ;
-OP_RESTO_DIVISAO : '%' ;
+// Operadores aritméticos (implementados como OP regex)
+OP_PLUS : '+' ;
+OP_MINUS : '-' ;
+OP_MULT : '*' ;
+OP_DIV : '/' ;
+OP_MOD : '%' ;
 
 // Operadores lógicos
-OP_NEGACAO : '!' ;
-OP_E : '&&' ;
-OP_OU : '||' ;
+NOT : '!' ;
+AND : '&&' ;
+OR : '||' ;
 
 // Operadores relacionais
-OP_IGUAL : '==' ;
-OP_DIFERENTE : '!=' ;
-OP_MAIOR : '>';
-OP_MAIOR_IGUAL : '>=';
-OP_MENOR : '<' ;
-OP_MENOR_IGUAL : '<=' ;
+EQ : '==' ;
+NEQ : '!=' ;
+GTE : '>=' ;
+LTE : '<=' ;
+GT : '>';
+LT : '<' ;
 
 // Atribuição
-OP_ATRIBUICAO : '=' ;
+ASSIGN : '=' ;
 
 // Literais
-TRUE: 'true';
-FALSE: 'false';
-NUM_INT : [0-9]+ ;
-NUM_DEC : [0-9]+ '.' [0-9]+ | '.' [0-9]+ ;
+NUMBER : [0-9]+ ('.' [0-9]+)? ;  // Implementado como NUMBER regex
 
 // Identificadores
 ID: [a-zA-Z_][a-zA-Z_0-9]* ;
 
-// Comentários
-COMENTARIO_LINHA: '#' ~[\r\n]* -> skip ;
-COMENTARIO_BLOCO: '/*' .*? '*/' -> skip ;
+// Comentários (implementado como COMMENT regex)
+COMMENT: '#' ~[\r\n]* -> skip ;
 
 // Whitespace
 WS: [ \t\n\r\f]+ -> skip ;

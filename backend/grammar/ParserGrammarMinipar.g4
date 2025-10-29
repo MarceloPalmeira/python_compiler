@@ -12,44 +12,29 @@ declaracao
     | comando
     ;
 
-// Declaração de variável: var nome: tipo = valor
+// Declaração de variável: var nome (: tipo)? (= valor)? ;
 declaracao_variavel
-    : VAR ID DOIS_PONTOS tipo (OP_ATRIBUICAO expressao)? PONTO_VIRGULA?
+    : VAR ID (COLON ID)? (ASSIGN expressao)? SEMICOLON?
     ;
 
-// Declaração de função: func nome(param: tipo) -> tipo { ... }
+// Declaração de função: func nome(param, ...) (-> tipo)? { ... }
 declaracao_funcao
-    : FUNC ID PARENTESE_ABRE parametros? PARENTESE_FECHA (ARROW tipo)? bloco
+    : FUNC ID LPAREN parametros? RPAREN (ARROW ID)? bloco
     ;
 
-// Tipos da linguagem MiniPar
-tipo
-    : TIPO_NUMBER
-    | TIPO_BOOL
-    | TIPO_STRING
-    | TIPO_LIST
-    | TIPO_DICT
-    | TIPO_VOID
-    | TIPO_ANY
-    ;
-
-// Parâmetros de função
+// Parâmetros de função (sem tipos explícitos implementados)
 parametros
-    : parametro (VIRGULA parametro)*
-    ;
-
-parametro
-    : ID DOIS_PONTOS tipo (OP_ATRIBUICAO expressao)?  // Parâmetro com valor padrão
+    : ID (COLON ID)? (COMMA ID (COLON ID)?)*
     ;
 
 // Bloco de código
 bloco
-    : CHAVE_ABRE (declaracao | comando)* CHAVE_FECHA
+    : LBRACE (declaracao | comando)* RBRACE
     ;
 
 // Comandos
 comando
-    : comando_linha PONTO_VIRGULA?
+    : comando_linha SEMICOLON?
     | comando_bloco
     | bloco_paralelo
     ;
@@ -60,6 +45,7 @@ comando_linha
     | RETURN expressao?    #ComandoReturn
     | BREAK               #ComandoBreak
     | CONTINUE            #ComandoContinue
+    | PRINT LPAREN argumentos? RPAREN  #ComandoPrint
     ;
 
 comando_bloco
@@ -75,44 +61,44 @@ bloco_paralelo
 
 // Atribuição: variavel = expressao
 atribuicao
-    : acesso_variavel OP_ATRIBUICAO expressao
+    : ID ASSIGN expressao
     ;
 
 // Estrutura if/else
 if_statement
-    : IF PARENTESE_ABRE expressao PARENTESE_FECHA bloco (ELSE bloco)?
+    : IF LPAREN expressao RPAREN bloco (ELSE bloco)?
     ;
 
 // Laço while
 while_statement
-    : WHILE PARENTESE_ABRE expressao PARENTESE_FECHA bloco
+    : WHILE LPAREN expressao RPAREN bloco
     ;
 
-// Laço for
+// Laço for (implementação simples)
 for_statement
-    : FOR PARENTESE_ABRE VAR ID DOIS_PONTOS tipo IN expressao PARENTESE_FECHA bloco
+    : FOR LPAREN VAR ID (COLON ID)? IN expressao RPAREN bloco
     ;
 
 // Chamada de função
 chamada_funcao
-    : ID PARENTESE_ABRE argumentos? PARENTESE_FECHA
+    : ID LPAREN argumentos? RPAREN
     ;
 
 argumentos
-    : expressao (VIRGULA expressao)*
+    : expressao (COMMA expressao)*
     ;
 
-// Expressões
+// Expressões - hierarquia implementada
 expressao
     : expr_ou
     ;
 
 expr_ou
-    : expr_e (OP_OU expr_e)*
+    : expr_e (OR expr_e)*
     ;
 
 expr_e
-    : expr_relacional (OP_E expr_relacional)*
+    : expr_relacional (AND expr_relacional)*
     ;
 
 expr_relacional
@@ -120,12 +106,7 @@ expr_relacional
     ;
 
 op_relacional
-    : OP_IGUAL
-    | OP_DIFERENTE
-    | OP_MAIOR
-    | OP_MENOR
-    | OP_MAIOR_IGUAL
-    | OP_MENOR_IGUAL
+    : EQ | NEQ | GT | LT | GTE | LTE
     ;
 
 expr_aditiva
@@ -133,76 +114,30 @@ expr_aditiva
     ;
 
 op_aditivo
-    : SINAL_MAIS
-    | SINAL_MENOS
+    : OP_PLUS | OP_MINUS
     ;
 
 expr_multiplicativa
-    : fator (op_multiplicativo fator)*
+    : fator_unario (op_multiplicativo fator_unario)*
     ;
 
 op_multiplicativo
-    : OP_MULTIPLICACAO
-    | OP_DIVISAO
-    | OP_RESTO_DIVISAO
+    : OP_MULT | OP_DIV | OP_MOD
     ;
 
-fator
-    : (sinal)? termo                                    #FatorTermo
-    | STRING                                            #FatorString
-    | OP_NEGACAO fator                                  #FatorNegacao
-    | (sinal)? PARENTESE_ABRE expressao PARENTESE_FECHA #FatorExpressao
+fator_unario
+    : NOT fator_unario           #FatorNegacao
+    | (OP_PLUS | OP_MINUS) fator_unario  #FatorSinal
+    | fator_primario             #FatorPrimario
     ;
 
-termo
-    : acesso_variavel      #TermoVariavel
-    | constante           #TermoConstante
-    | chamada_funcao      #TermoFuncao
-    | lista               #TermoLista
-    | dict_literal        #TermoDicionario
-    ;
-
-sinal
-    : SINAL_MAIS
-    | SINAL_MENOS
-    ;
-
-constante
-    : NUM_INT
-    | NUM_DEC
-    | TRUE
-    | FALSE
-    | STRING
-    ;
-
-// Acesso a variáveis e arrays
-acesso_variavel
-    : ID                                           #AcessoSimples
-    // Suporta um ou mais índices (inclui slicing via index_expr)
-    | ID (COLCHETE_ABRE index_expr COLCHETE_FECHA)+    #AcessoArray
-    | ID PONTO ID                                  #AcessoPropriedade
-    ;
-
-// index_expr: expressão normal ou slice (start:end) com partes opcionais
-index_expr
-    : expressao
-    | expressao? DOIS_PONTOS expressao?   // permite [:end], [start:], [start:end]
-    ;
-
-// Lista literal
-lista
-    : COLCHETE_ABRE (expressao (VIRGULA expressao)*)? COLCHETE_FECHA
-    ;
-
-// Dicionário literal: { "key": expr, ... }
-dict_literal
-    : CHAVE_ABRE (dict_entries)? CHAVE_FECHA
-    ;
-
-dict_entries
-    : dict_entry (VIRGULA dict_entry)*
-    ;
-
-dict_entry
-    : STRING DOIS_PONTOS expressao
+fator_primario
+    : NUMBER                     #FatorNumero
+    | STRING                     #FatorString  
+    | TRUE                       #FatorTrue
+    | FALSE                      #FatorFalse
+    | ID                         #FatorIdentificador
+    | chamada_funcao             #FatorChamada
+    | PRINT LPAREN argumentos? RPAREN  #FatorPrint
+    | LPAREN expressao RPAREN    #FatorExpressao
     ;
