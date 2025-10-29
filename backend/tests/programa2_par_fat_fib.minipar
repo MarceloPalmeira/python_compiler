@@ -1,0 +1,35 @@
+# Fatorial (iterativo)
+func fatorial(n: number) -> number {
+    var res: number = 1
+    while (n > 1) {
+        res = res * n
+        n = n - 1
+    }
+    return res
+}
+
+# Fibonacci (iterativo)
+func fibonacci(n: number) -> number {
+    if (n == 0) { return 0 } else { if (n == 1) { return 1 } }
+    var a: number = 0
+    var b: number = 1
+    var i: number = 2
+    while (i <= n) {
+        var t: number = a + b
+        a = b
+        b = t
+        i = i + 1
+    }
+    return b
+}
+
+# Após PAR, os comandos do bloco são tratados como paralelos no TAC
+par {
+    var f: number = fatorial(6);
+    print("Fatorial(6) =", f);
+
+    var fib: number = fibonacci(10);
+    print("Fibonacci(10) =", fib);
+}
+
+

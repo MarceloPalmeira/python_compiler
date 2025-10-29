@@ -1,0 +1,32 @@
+# Ativação degrau
+func step(x: number) -> number {
+    if (x >= 0) { return 1 } else { return 0 }
+}
+
+# Rede 2-3-1 com degrau
+# h1 = step(x1 - 0.5)  -> passa x1
+# h2 = step(x2 - 0.5)  -> passa x2
+# h3 = step(x1 + x2 - 1.5) -> AND(x1, x2)
+# y  = step(h1 + h2 - (2 * h3) - 0.5) -> XOR
+func xor_nn(x1: number, x2: number) -> number {
+    var s1: number = x1 - 0.5
+    var h1: number = step(s1)
+
+    var s2: number = x2 - 0.5
+    var h2: number = step(s2)
+
+    var s3: number = x1 + x2 - 1.5
+    var h3: number = step(s3)
+
+    var out_sum: number = h1 + h2 - (2 * h3) - 0.5
+    var y: number = step(out_sum)
+    return y
+}
+
+print("Testes XOR:")
+print("(0,0) ->", xor_nn(0, 0))
+print("(0,1) ->", xor_nn(0, 1))
+print("(1,0) ->", xor_nn(1, 0))
+print("(1,1) ->", xor_nn(1, 1))
+
+

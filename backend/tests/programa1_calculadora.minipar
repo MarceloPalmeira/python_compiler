@@ -1,0 +1,26 @@
+# Calculadora simples: lê operação e operandos, computa e imprime
+
+func calcula(op, a, b) -> number {
+    if (op == "+") {
+        return a + b
+    } else {
+        if (op == "-") {
+            return a - b
+        } else {
+            if (op == "*") {
+                return a * b
+            } else {
+                # Divisão: no ARM gerado, a divisão é tratada como placeholder
+                return a / b
+            }
+        }
+    }
+}
+
+print("Opções: +, -, *, /")
+var operacao: string = input("Operação: ");
+var valor1: number = input("Valor 1: ");
+var valor2: number = input("Valor 2: ");
+
+var resultado: number = calcula(operacao, valor1, valor2);
+print("Resultado:", resultado);
