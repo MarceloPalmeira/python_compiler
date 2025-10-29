@@ -45,7 +45,7 @@ O frontend segue as diretrizes de design da Apple:
 
 ## 🔗 API
 
-O frontend se conecta ao backend FastAPI em `http://127.0.0.1:8000`
+O frontend se conecta ao backend FastAPI em `http://localhost:8000`
 
 Endpoints utilizados:
 

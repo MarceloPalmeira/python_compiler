@@ -40,7 +40,7 @@ function Header() {
 
           <div className="flex items-center gap-4">
             <motion.a
-              href="http://127.0.0.1:8000/docs"
+              href="http://localhost:8000/docs"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
