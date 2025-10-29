@@ -8,7 +8,7 @@ from typing import Optional
 
 
 class CompilerCommand:
-    """Handles compilation of code to LLVM IR"""
+    """Handles compilation of code to TAC (three-address code)"""
     
     def __init__(self):
         self.show_tree = False
@@ -74,26 +74,30 @@ class CompilerCommand:
             if not code:
                 print("No input detected. Exiting...")
                 sys.exit(0)
-            
+
             try:
-                ir_program = self._compile_code(code)
+                tac_lines = self._compile_code(code)
                 print("\n" + "="*50)
-                print("LLVM IR Output:")
+                print("TAC Output:")
                 print("="*50)
-                print(ir_program)
+                print('\n'.join(tac_lines) if isinstance(tac_lines, list) else str(tac_lines))
                 print("="*50 + "\n")
             except Exception as e:
                 print(f"Compilation error: {e}")
             
             print("Enter more code (--stop to compile, --exit to exit):")
     
-    def _compile_code(self, code: str) -> str:
-        """Compile MiniPar code string to LLVM IR"""
+    def _compile_code(self, code: str):
+        """Compile MiniPar code string to TAC (three-address code)
+
+        Returns a list of TAC instruction strings.
+        """
         try:
-            # Use simple MiniPar compiler (no ANTLR dependencies)
-            from .llvm.simple_minipar_compiler import SimpleMiniparCompiler
-            compiler = SimpleMiniparCompiler()
-            return compiler.compile_to_ir(code)
+            # Use the new functional compiler implementation
+            from . import simple_minipar_compiler as sm
+            ast = sm.parse(code)
+            tac = sm.generate_tac(ast)
+            return tac
         except Exception as e:
             raise Exception(f"MiniPar compilation failed: {e}")
     

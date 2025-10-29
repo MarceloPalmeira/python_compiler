@@ -23,13 +23,13 @@
 - ✅ Arrays/listas: `[1, 2, 3]`
 
 #### 3. **Código Intermediário (Três Endereços)**
-- ✅ **LLVM IR completo** (equivalente a código de três endereços)
+- ✅ **TAC completo** (equivalente a código de três endereços, textual)
 - ✅ Declarações de variáveis com `alloca`
 - ✅ Atribuições com `store`/`load`
 - ✅ Chamadas de função
 - ✅ Estruturas de controle com `br`, `label`
 - ✅ Funções externas: `printf`, `scanf`, `malloc`
-- ✅ Tipos LLVM corretos: `double`, `i32`, `i1`, `i8*`
+- ✅ Tipos (representação interna adequada): `double`, `i32`, `i1`, `i8*`
 
 #### 4. **Geração de Assembly ARM**
 - ✅ **Assembly ARM compatível com CPULator**
@@ -52,12 +52,11 @@
 - ✅ **CLI**: `python main.py compiler arquivo.minipar`
 - ✅ **REST API**: Endpoints completos
   - `POST /compiler/upload` - Upload de código
-  - `GET /compiler/{id}/llvm/ir` - LLVM IR
+        - `GET /compiler/{id}/tac` - TAC (three-address code)
   - `GET /compiler/{id}/asm` - Assembly ARM
   - `GET /compiler/{id}/syntax` - Árvore sintática
   - `GET /compiler/{id}/token` - Lista de tokens
   - `GET /compiler/{id}/symbols` - Tabela de símbolos
-  - `GET /compiler/{id}/complexity` - Análise de complexidade
 
 ### 🧪 TESTES REALIZADOS
 
@@ -81,7 +80,7 @@
 🧪 TESTING OFFICIAL MINIPAR FACTORIAL EXAMPLE
 ============================================================
 ✅ Code uploaded successfully
-✅ LLVM IR (Three-Address Code): WORKING
+✅ TAC (Three-Address Code): WORKING
 ✅ Tokenization (58 tokens): WORKING  
 ✅ Syntax Tree (AST): WORKING
 ✅ Symbols Table: WORKING
@@ -97,7 +96,7 @@ MiniPar Source Code
         ↓
 [SimpleMiniparCompiler]
         ↓
-LLVM IR (Three-Address Code)
+TAC (Three-Address Code)
         ↓
 ARM Assembly (CPULator)
 ```

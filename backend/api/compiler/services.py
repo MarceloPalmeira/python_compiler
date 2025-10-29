@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional, Dict
 import subprocess
 import sys
+import importlib.util
 
 # Add project root to path for compiler imports
 project_root = Path(__file__).parent.parent.parent
@@ -77,178 +78,119 @@ class CodeCacheManager:
         return file_path if file_path.exists() else None
 
 
-class LLVMCompilerService:
-    """LLVM compilation service - equivalent to Java LLVMCompilerService"""
-    
+class TACCompilerService:
+    """TAC/Assembly service. Produces TAC (three-address code) and ARM
+    assembly via dynamic imports of the lightweight translators.
+    """
+
     def __init__(self, code_cache_manager: CodeCacheManager):
         self.code_cache_manager = code_cache_manager
         self.cache_dir = code_cache_manager.cache_dir
-        self._llvm_cache: Dict[str, str] = {}
-    
+        # Cache stores TAC and ASM results keyed by suffixes
+        self._tac_cache: Dict[str, str] = {}
+
     def check_successful_compilation(self, code_id: str) -> Optional[str]:
-        """Check if code compiles successfully"""
         try:
-            self.get_llvm_ir_code(code_id)
-            return None  # No error
+            self.get_tac_code(code_id)
+            return None
         except Exception as e:
             return str(e)
-    
-    def get_llvm_ir_code(self, code_id: str) -> Optional[str]:
-        """Get LLVM IR code for given code ID"""
-        # Check cache first
-        cache_key = f"{code_id}_ir"
-        if cache_key in self._llvm_cache:
-            return self._llvm_cache[cache_key]
-        
-        # Get original code
+
+    def get_tac_code(self, code_id: str) -> Optional[str]:
+        """Produce TAC for a stored code id. Returns TAC as plain text."""
+        cache_key = f"{code_id}_tac"
+        if cache_key in self._tac_cache:
+            return self._tac_cache[cache_key]
+
         code = self.code_cache_manager.load_code_from_id(code_id)
         if code is None:
             return None
-        
+
         try:
-            # Import simple MiniPar compiler (no ANTLR dependencies)
-            from compiler.llvm.simple_minipar_compiler import SimpleMiniparCompiler
-            llvm_ir = SimpleMiniparCompiler.compile_to_ir(code)
-            
-            # Cache result
-            self._llvm_cache[cache_key] = llvm_ir
-            
-            # Save to file
-            ir_file_path = self.cache_dir / f"{code_id}.ll"
-            with open(ir_file_path, 'w', encoding='utf-8') as f:
-                f.write(llvm_ir)
-            
-            return llvm_ir
+            # Load tac_generator dynamically from backend/compiler/tac_generator.py
+            tac_path = os.path.abspath(os.path.join(Path(__file__).parent.parent, 'compiler', 'tac_generator.py'))
+            spec = importlib.util.spec_from_file_location('tac_generator', tac_path)
+            tac_mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(tac_mod)
+
+            # Try to interpret stored code as JSON AST; otherwise fallback to
+            # an empty AST body so the generator can still run.
+            try:
+                possible_ast = json.loads(code)
+            except Exception:
+                possible_ast = {'body': []}
+
+            tac_lines = tac_mod.generate_tac(possible_ast)
+            tac_text = '\n'.join(tac_lines) if isinstance(tac_lines, list) else str(tac_lines)
+
+            # Cache and persist
+            self._tac_cache[cache_key] = tac_text
+            tac_file = self.cache_dir / f"{code_id}.tac"
+            with open(tac_file, 'w', encoding='utf-8') as f:
+                f.write(tac_text)
+
+            return tac_text
         except Exception as e:
-            raise Exception(f"LLVM IR compilation failed: {e}")
-    
-    def get_opt_llvm_ir_code(self, code_id: str, opt_level) -> Optional[str]:
-        """Get optimized LLVM IR code"""
-        cache_key = f"{code_id}_ir_opt_{opt_level.value}"
-        if cache_key in self._llvm_cache:
-            return self._llvm_cache[cache_key]
-        
-        # Get base IR first
-        base_ir = self.get_llvm_ir_code(code_id)
-        if base_ir is None:
+            raise Exception(f"TAC generation failed: {e}")
+
+    def get_opt_tac_code(self, code_id: str, opt_level) -> Optional[str]:
+        cache_key = f"{code_id}_tac_opt_{opt_level.value}"
+        if cache_key in self._tac_cache:
+            return self._tac_cache[cache_key]
+
+        base = self.get_tac_code(code_id)
+        if base is None:
             return None
-        
+
         try:
-            # For now, return the same IR (optimization would require LLVM tools)
-            # In a real implementation, you would call 'opt' tool here
-            optimized_ir = f"; Optimized with {opt_level.value}\n{base_ir}"
-            
-            self._llvm_cache[cache_key] = optimized_ir
-            return optimized_ir
+            optimized = f"; Optimization level {opt_level.value}\n{base}"
+            self._tac_cache[cache_key] = optimized
+            return optimized
         except Exception as e:
-            raise Exception(f"LLVM IR optimization failed: {e}")
-    
+            raise Exception(f"TAC optimization failed: {e}")
+
     def get_asm_code(self, code_id: str) -> Optional[str]:
-        """Get ARM assembly code compatible with CPULator"""
+        """Generate ARM assembly (CPULator) from TAC via tac_to_arm translator."""
         cache_key = f"{code_id}_asm"
-        if cache_key in self._llvm_cache:
-            return self._llvm_cache[cache_key]
-        
-        # Get original code
+        if cache_key in self._tac_cache:
+            return self._tac_cache[cache_key]
+
         code = self.code_cache_manager.load_code_from_id(code_id)
         if code is None:
             return None
-        
+
         try:
-            # Generate ARM assembly for CPULator
-            asm_code = self._generate_arm_assembly(code)
-            
-            self._llvm_cache[cache_key] = asm_code
-            return asm_code
+            # First generate TAC
+            tac_text = self.get_tac_code(code_id)
+            if tac_text is None:
+                return None
+            tac_lines = tac_text.split('\n')
+
+            # Load tac_to_arm translator
+            tac2arm_path = os.path.abspath(os.path.join(Path(__file__).parent.parent, 'compiler', 'tac_to_arm.py'))
+            spec2 = importlib.util.spec_from_file_location('tac_to_arm', tac2arm_path)
+            tac2arm_mod = importlib.util.module_from_spec(spec2)
+            spec2.loader.exec_module(tac2arm_mod)
+
+            asm = tac2arm_mod.tac_to_arm(tac_lines)
+
+            self._tac_cache[cache_key] = asm
+            return asm
         except Exception as e:
             raise Exception(f"Assembly generation failed: {e}")
-    
-    def _generate_arm_assembly(self, code: str) -> str:
-        """Generate ARM assembly compatible with CPULator (https://cpulator.01xz.net/?sys=arm)"""
-        asm = []
-        
-        # ARM assembly header for CPULator
-        asm.append(".text")
-        asm.append(".global _start")
-        asm.append("")
-        asm.append("_start:")
-        
-        # Parse simple variable declarations and assignments
-        variables = {}
-        lines = code.strip().split('\n')
-        
-        for line in lines:
-            line = line.strip()
-            if line.startswith('var ') and ':' in line and '=' in line:
-                # Extract variable info: var name: type = value
-                parts = line.replace('var ', '').split(':')
-                if len(parts) >= 2:
-                    var_name = parts[0].strip()
-                    type_and_value = parts[1].strip()
-                    if '=' in type_and_value:
-                        var_type = type_and_value.split('=')[0].strip()
-                        var_value = type_and_value.split('=')[1].strip()
-                        
-                        if var_value.isdigit():
-                            variables[var_name] = int(var_value)
-        
-        # Generate ARM code for variables
-        if variables:
-            asm.append("    @ Initialize variables")
-            reg_counter = 0
-            for var_name, var_value in variables.items():
-                asm.append(f"    mov r{reg_counter}, #{var_value}     @ {var_name} = {var_value}")
-                reg_counter += 1
-                if reg_counter >= 12:  # ARM has r0-r12 general purpose
-                    break
-        
-        # Handle simple arithmetic if present
-        if len(variables) >= 2:
-            var_names = list(variables.keys())
-            if 'result' in var_names or '+' in code:
-                asm.append("")
-                asm.append("    @ Perform arithmetic operation")
-                asm.append("    add r2, r0, r1      @ result = a + b")
-        
-        # Handle print statements
-        if 'print(' in code:
-            asm.append("")
-            asm.append("    @ Print operation (simplified)")
-            asm.append("    mov r7, #4          @ sys_write")
-            asm.append("    mov r0, #1          @ stdout")
-            asm.append("    ldr r1, =msg        @ message address")
-            asm.append("    mov r2, #20         @ message length")
-            asm.append("    swi 0               @ system call")
-        
-        # Program exit
-        asm.append("")
-        asm.append("    @ Exit program")
-        asm.append("    mov r7, #1          @ sys_exit")
-        asm.append("    mov r0, #0          @ exit status")
-        asm.append("    swi 0               @ system call")
-        
-        # Data section
-        if 'print(' in code:
-            asm.append("")
-            asm.append(".data")
-            asm.append("msg: .ascii \"MiniPar Result\\n\"")
-        
-        return '\n'.join(asm)
-    
+
     def get_opt_asm_code(self, code_id: str, opt_level) -> Optional[str]:
-        """Get optimized assembly code"""
         cache_key = f"{code_id}_asm_opt_{opt_level.value}"
-        if cache_key in self._llvm_cache:
-            return self._llvm_cache[cache_key]
-        
+        if cache_key in self._tac_cache:
+            return self._tac_cache[cache_key]
+
         try:
             base_asm = self.get_asm_code(code_id)
             if base_asm is None:
                 return None
-            
+
             optimized_asm = f"; Optimized assembly with {opt_level.value}\n{base_asm}"
-            
-            self._llvm_cache[cache_key] = optimized_asm
+            self._tac_cache[cache_key] = optimized_asm
             return optimized_asm
         except Exception as e:
             raise Exception(f"Optimized assembly generation failed: {e}")
@@ -330,29 +272,3 @@ class SymbolsTableService:
             return symbols_table
         except Exception as e:
             raise Exception(f"Symbols table generation failed: {e}")
-
-
-class ComplexityAnalysisService:
-    """Complexity analysis service"""
-    
-    def __init__(self, code_cache_manager: CodeCacheManager):
-        self.code_cache_manager = code_cache_manager
-        self._cache: Dict[str, str] = {}
-    
-    def get_complexity_analysis(self, code_id: str) -> Optional[str]:
-        """Get complexity analysis"""
-        if code_id in self._cache:
-            return self._cache[code_id]
-        
-        code = self.code_cache_manager.load_code_from_id(code_id)
-        if code is None:
-            return None
-        
-        try:
-            # Placeholder implementation
-            complexity_analysis = f"Complexity analysis for code ID: {code_id}\n(Implementation pending - requires complexity analyzer)"
-            
-            self._cache[code_id] = complexity_analysis
-            return complexity_analysis
-        except Exception as e:
-            raise Exception(f"Complexity analysis failed: {e}")

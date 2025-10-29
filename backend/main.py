@@ -27,7 +27,7 @@ def cli():
 @click.option('-t', '--show-tree', is_flag=True, 
               help='Display the parse tree')
 def compiler(input_file, output_file, show_tree):
-    """Compiles the code to LLVM"""
+    """Compiles the code to TAC (three-address code)"""
     try:
         from compiler.compiler_command import CompilerCommand
         compiler_cmd = CompilerCommand()

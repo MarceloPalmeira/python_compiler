@@ -43,8 +43,8 @@ class CodeResponse(BaseModel):
     code_id: str = Field(..., description="ID único gerado para o código", example="a1b2c3d4e5f6")
 
 class CompilationResponse(BaseModel):
-    """Resposta de compilação"""
-    llvm_ir: str = Field(..., description="Código LLVM IR gerado")
+    """Resposta de compilação (TAC)"""
+    tac: str = Field(..., description="Código TAC gerado")
 
 
 @router.post("/upload", 
@@ -92,7 +92,7 @@ async def upload_code(request: CodeUploadRequest):
            description="""
            **Lista todos os níveis de otimização disponíveis na API**
            
-           Use estes valores nos endpoints `/llvm/ir/opt/{opt_level}` e `/asm/opt/{opt_level}`
+           Use estes valores nos endpoints `/compiler/{code_id}/tac/opt/{opt_level}` and `/compiler/{code_id}/asm/opt/{opt_level}`
            """,
            responses={
                200: {"description": "Lista de níveis de otimização"}
@@ -114,11 +114,11 @@ async def get_optimization_levels():
     return {
         "optimization_levels": levels,
         "usage": {
-            "llvm_ir": "/compiler/{code_id}/llvm/ir/opt/{opt_level}",
+            "tac": "/compiler/{code_id}/tac/opt/{opt_level}",
             "assembly": "/compiler/{code_id}/asm/opt/{opt_level}"
         },
         "examples": [
-            "http://localhost:8000/compiler/your_code_id/llvm/ir/opt/O2",
+            "http://localhost:8000/compiler/your_code_id/tac/opt/O2",
             "http://localhost:8000/compiler/your_code_id/asm/opt/O3"
         ]
     }
@@ -142,94 +142,7 @@ async def get_code(code_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{code_id}/llvm/ir",
-           summary="⚙Compilar para LLVM IR",
-           description="""
-           **Compila o código para LLVM IR (Intermediate Representation)**
-           
-           O LLVM IR é uma linguagem intermediária que pode ser:
-           - Otimizada pelo LLVM
-           - 📦 Compilada para código de máquina
-           - 🔄 Convertida para assembly
-           
-           **Retorna apenas o código LLVM IR para copy/paste direto**
-           """,
-           responses={
-               200: {"description": "Código LLVM IR puro"},
-               404: {"description": "Código não encontrado"},
-               500: {"description": "🚫 Erro de compilação"}
-           })
-async def get_llvm_ir_code(code_id: str):
-    """⚙**LLVM IR** - Compila código para LLVM Intermediate Representation"""
-    try:
-        llvm_ir = compiler_service.compile_to_llvm_ir(code_id)
-        if llvm_ir is None:
-            raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return Response(content=llvm_ir, media_type="text/plain")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.get("/{code_id}/llvm/ir/opt/{opt_level}",
-           summary="⚡ LLVM IR Otimizado",
-           description="""
-           **Compila código para LLVM IR com otimização específica**
-           
-           ## Níveis de otimização disponíveis:
-           
-           - **O0**: Sem otimização, debug completo
-           - **O1**: Otimização básica, equilibra velocidade e debug
-           - **O2**: Otimização padrão, melhor performance sem quebrar debug
-           - **O3**: Otimização máxima, pode sacrificar debug
-           
-           **Retorna apenas o código LLVM IR otimizado para copy/paste direto**
-           """,
-           responses={
-               200: {"description": "Código LLVM IR otimizado puro"},
-               400: {"description": "Nível de otimização inválido"},
-               404: {"description": "Código não encontrado"}
-           })
-async def get_llvm_code_optimized(
-    code_id: str, 
-    opt_level: str = Path(
-        ...,
-        description="Nível de otimização LLVM",
-        example="O2",
-        regex="^(O0|O1|O2|O3)$"
-    )
-):
-    """⚡ **LLVM IR Otimizado** - Aplica otimizações específicas ao código LLVM"""
-    try:
-        # Valida o nível de otimização
-        opt_level_enum = OptLevel.from_string(opt_level)
-        if opt_level_enum is None:
-            available_levels = [level.value for level in OptLevel]
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Nível de otimização inválido: '{opt_level}'. "
-                      f"Níveis disponíveis: {', '.join(available_levels)}"
-            )
-        
-        # Compila código base
-        llvm_ir = compiler_service.compile_to_llvm_ir(code_id)
-        if llvm_ir is None:
-            raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        
-        # Aplica otimização (por enquanto, simula diferentes níveis)
-        optimization_headers = {
-            OptLevel.O0: "; Optimization level O0 - No optimization, full debug info",
-            OptLevel.O1: "; Optimization level O1 - Basic optimization, debug friendly", 
-            OptLevel.O2: "; Optimization level O2 - Standard optimization",
-            OptLevel.O3: "; Optimization level O3 - Aggressive optimization"
-        }
-        
-        optimized_ir = f"""{llvm_ir}"""
-        
-        return Response(content=optimized_ir, media_type="text/plain")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{code_id}/asm",
@@ -246,13 +159,11 @@ async def get_llvm_code_optimized(
 async def get_asm_code(code_id: str):
     """Get ARM assembly code compatible with CPULator"""
     try:
-        code = compiler_service.get_code(code_id)
-        if code is None:
+        # Prefer TAC->ARM pipeline
+        asm_code = compiler_service.compile_tac_to_arm(code_id)
+        if asm_code is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        # Generate ARM assembly for CPULator
-        asm_code = _generate_cpulator_arm_assembly(code)
 
-        # Return as a plain text attachment so tools (or users) download raw .s file
         return Response(content=asm_code,
                         media_type="text/plain",
                         headers={"Content-Disposition": 'attachment; filename="program.s"'})
@@ -439,7 +350,7 @@ _start:
 
 
 @router.get("/{code_id}/syntax",
-           summary="🌳 Árvore Sintática",
+           summary="Árvore Sintática",
            description="**Retorna apenas a árvore sintática - copy/paste direto**",
            responses={
                200: {"description": "Árvore sintática pura"},
@@ -452,6 +363,33 @@ async def get_syntax_tree(code_id: str):
         if syntax_tree is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
         return Response(content=str(syntax_tree), media_type="text/plain")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{code_id}/tac",
+           summary="Código Intermediário (TAC)",
+           description="""
+           Retorna o código intermediário em Three-Address Code (TAC) gerado a partir da AST.
+           Útil para inspeção, otimizações e como passo intermediário na pipeline de compilação.
+           """,
+           responses={
+               200: {"description": "Código TAC puro"},
+               404: {"description": "Código não encontrado"},
+               500: {"description": "Erro ao gerar TAC"}
+           })
+async def get_tac_code(code_id: str):
+    """Retorna TAC (three-address code) gerado pelo backend"""
+    try:
+        tac = compiler_service.compile_to_tac(code_id)
+        if tac is None:
+            raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
+
+        # tac é uma lista de instruções (strings) — retornamos como texto puro
+        tac_text = "\n".join(tac)
+        return Response(content=tac_text, media_type="text/plain")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -488,23 +426,5 @@ async def get_symbols_table(code_id: str):
         if symbols_table is None:
             raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
         return Response(content=str(symbols_table), media_type="text/plain")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/{code_id}/complexity",
-           summary="Análise de Complexidade",
-           description="**Retorna apenas a análise de complexidade - copy/paste direto**",
-           responses={
-               200: {"description": "Análise de complexidade pura"},
-               404: {"description": "Código não encontrado"}
-           })
-async def get_complexity_analysis(code_id: str):
-    """Get complexity analysis"""
-    try:
-        complexity_analysis = compiler_service.get_complexity_analysis(code_id)
-        if complexity_analysis is None:
-            raise HTTPException(status_code=404, detail=f"Code with ID {code_id} not found")
-        return Response(content=str(complexity_analysis), media_type="text/plain")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

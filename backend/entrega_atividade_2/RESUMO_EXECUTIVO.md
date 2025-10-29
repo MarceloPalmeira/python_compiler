@@ -13,14 +13,14 @@
 
 ### **Fluxo de Compilação Completo:**
 ```
-📝 MiniPar Source → 🔤 Lexer → 🌳 Parser → 📊 AST → 🔧 LLVM IR → ⚙️ ARM Assembly
+📝 MiniPar Source → 🔤 Lexer → 🌳 Parser → 📊 AST → 🔧 TAC (three-address code) → ⚙️ ARM Assembly
 ```
 
 ### **Componentes Implementados:**
 1. **🔤 Lexer**: `tokenize()` - 15 tipos de tokens MiniPar
 2. **🌳 Parser**: `parse()` - Geração de AST estruturado
 3. **📊 AST**: Árvore sintática com nós tipados
-4. **🔧 LLVM IR**: Código intermediário (3-endereços)
+4. **🔧 TAC**: Código intermediário (3-endereços, textual)
 5. **⚙️ Assembly**: ARM compatível com CPULator
 
 ---
@@ -32,7 +32,7 @@
 🧪 TESTING OFFICIAL MINIPAR FACTORIAL EXAMPLE
 ============================================================
 ✅ Code uploaded successfully - ID: d3f062b82c15343a
-✅ LLVM IR (Three-Address Code): WORKING
+✅ TAC (Three-Address Code): WORKING
 ✅ Tokenization (58 tokens): WORKING  
 ✅ Syntax Tree (AST): WORKING
 ✅ Symbols Table: WORKING
@@ -65,7 +65,7 @@ http://localhost:8000/docs
 
 ### **3. Endpoints Funcionais:**
 - `POST /compiler/upload` - Upload código
-- `GET /compiler/{id}/llvm/ir` - LLVM IR
+- `GET /compiler/{id}/tac` - TAC (three-address code)
 - `GET /compiler/{id}/asm` - Assembly ARM
 - `GET /compiler/{id}/syntax` - AST
 - `GET /compiler/{id}/token` - Tokens
@@ -97,7 +97,7 @@ http://localhost:8000/docs
 ├── 📄 requirements.txt            # Dependências
 ├── 🔧 main.py                     # CLI principal
 ├── 🔧 run_api.py                  # Servidor API
-├── 📁 compiler/llvm/              # Compilador MiniPar
+├── 📁 compiler/              # Compilador MiniPar (functional)
 ├── 📁 grammar/                    # Gramáticas ANTLR
 ├── 📁 api/                        # API REST
 └── 📁 services/                   # Serviços de compilação
@@ -117,7 +117,7 @@ python final_check.py           # Verificação CPULator
 **PROJETO 100% FUNCIONAL E CONFORME COM TEMA 1**
 
 - ✅ Compilador MiniPar completo
-- ✅ Código intermediário (LLVM IR)
+- ✅ Código intermediário (TAC)
 - ✅ Assembly ARM para CPULator
 - ✅ Interfaces CLI e API
 - ✅ Documentação técnica

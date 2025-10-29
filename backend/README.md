@@ -3,10 +3,12 @@
 ## Tema 1: Compilador MiniPar com Geração de Código Intermediário e Assembly ARM
 
 Este projeto implementa um **compilador completo** para a linguagem **MiniPar 2025.1** com:
-- **Análise Léxica (Lexer)** - Tokenização completa
-- **Análise Sintática (Parser)** - Geração de AST
-- **Código Intermediário** - LLVM IR (equivalente a código de três endereços)
+- **Análise Léxica (Lexer)** - Tokenização completa via `simple_minipar_compiler.py`
+- **Análise Sintática (Parser)** - Geração de AST funcional
+- **Código Intermediário** - TAC (Three-Address Code, textual IR)
 - **Assembly ARM** - Compatível com CPULator (https://cpulator.01xz.net/?sys=arm)
+
+> **Implementação Principal**: O projeto usa `simple_minipar_compiler.py` - um compilador funcional standalone que não depende de ANTLR. As gramáticas ANTLR estão disponíveis para referência e uso avançado.
 
 ## Setup
 
@@ -36,8 +38,7 @@ python_compiler/
 ├── compiler/                # Módulo do compilador
 │   ├── generated/          # Arquivos ANTLR originais
 │   ├── generated_minipar/  # Arquivos ANTLR MiniPar
-│   ├── llvm/              # Compilador MiniPar + LLVM IR
-│   │   └── simple_minipar_compiler.py  # Compilador standalone
+│   ├── simple_minipar_compiler.py  # Compilador standalone (funcional)
 │   └── compiler_command.py # Comando CLI
 ├── api/                    # API REST completa
 │   ├── main.py            # Servidor FastAPI
@@ -117,7 +118,7 @@ A API estará disponível em:
 | `/health` | GET | Status do servidor |
 | `/compiler/upload` | POST | Upload de código MiniPar |
 | `/compiler/{code_id}` | GET | Código fonte original |
-| `/compiler/{code_id}/llvm/ir` | GET | LLVM IR (código intermediário) |
+| `/compiler/{code_id}/tac` | GET | TAC (three-address code, textual IR) |
 | `/compiler/{code_id}/asm` | GET | Assembly ARM para CPULator |
 | `/compiler/{code_id}/syntax` | GET | Árvore sintática (AST) |
 | `/compiler/{code_id}/token` | GET | Lista de tokens |
@@ -192,7 +193,7 @@ print("Array ordenado:", ordenado)
 - **Compilador MiniPar completo** (SimpleMiniparCompiler)
 - **Análise Léxica** - Tokenização de todos os tokens MiniPar
 - **Análise Sintática** - Parser com geração de AST
-- **Código Intermediário** - LLVM IR (equivale a código de 3 endereços)
+- **Código Intermediário** - TAC (equivale a código de 3 endereços, textual)
 - **Assembly ARM** - Compatível com CPULator
 - **API REST com FastAPI** - Interface web completa
 - **Sistema de cache** - Armazenamento de códigos compilados
@@ -215,7 +216,7 @@ print("Array ordenado:", ordenado)
 
 ### Conformidade com Tema 1
 - **Compilador não Orientado a Objetos**: MiniPar funcional
-- **Geração de Código Intermediário**: LLVM IR (3-endereços)
+- **Geração de Código Intermediário**: TAC (3-endereços, textual)
 - **Geração de Assembly ARM**: CPULator compatível
 - **Linguagem MiniPar 2025.1**: Especificação oficial
 
@@ -238,7 +239,7 @@ python verify_requirements.py
 TESTING OFFICIAL MINIPAR FACTORIAL EXAMPLE
 ============================================================
 Code uploaded successfully - ID: d3f062b82c15343a
-LLVM IR (Three-Address Code): WORKING
+TAC (Three-Address Code): WORKING
 Tokenization (58 tokens): WORKING  
 Syntax Tree (AST): WORKING
 Symbols Table: WORKING
@@ -304,7 +305,7 @@ output_msg: .ascii "MiniPar Output\n"
 └─────────────────┘    └──────────────┘    └─────────────┘
                                                    │
 ┌─────────────────┐    ┌──────────────┐           │
-│   LLVM IR       │◀───│    Parser    │◀──────────┘
+│     TAC         │◀───│    Parser    │◀──────────┘
 │ (3-endereços)   │    │   (parse)    │
 └─────────────────┘    └──────────────┘
          │                     │
@@ -325,7 +326,7 @@ output_msg: .ascii "MiniPar Output\n"
 - **CPULator ARM Emulator**: https://cpulator.01xz.net/?sys=arm
 - **ANTLR4 Documentation**: https://github.com/antlr/antlr4
 - **FastAPI Documentation**: https://fastapi.tiangolo.com
-- **LLVM IR Reference**: https://llvm.org/docs/LangRef.html
+-- **TAC (three-address code)**: textual IR used by this project (no external reference required)
 
 ## Entrega Acadêmica
 
@@ -335,7 +336,7 @@ Este projeto atende **100%** aos requisitos do **Tema 1**:
 - **Compilador funcional** para linguagem MiniPar
 - **Análise Léxica** completa
 - **Análise Sintática** com AST
-- **Código Intermediário** (LLVM IR = 3-endereços)
+- **Código Intermediário** (TAC = 3-endereços, textual)
 - **Assembly ARM** para CPULator
 - **Interface API** REST completa
 - **Documentação** técnica

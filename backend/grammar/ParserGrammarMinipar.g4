@@ -159,6 +159,7 @@ termo
     | constante           #TermoConstante
     | chamada_funcao      #TermoFuncao
     | lista               #TermoLista
+    | dict_literal        #TermoDicionario
     ;
 
 sinal
@@ -177,11 +178,31 @@ constante
 // Acesso a variáveis e arrays
 acesso_variavel
     : ID                                           #AcessoSimples
-    | ID COLCHETE_ABRE expressao COLCHETE_FECHA    #AcessoArray
+    // Suporta um ou mais índices (inclui slicing via index_expr)
+    | ID (COLCHETE_ABRE index_expr COLCHETE_FECHA)+    #AcessoArray
     | ID PONTO ID                                  #AcessoPropriedade
+    ;
+
+// index_expr: expressão normal ou slice (start:end) com partes opcionais
+index_expr
+    : expressao
+    | expressao? DOIS_PONTOS expressao?   // permite [:end], [start:], [start:end]
     ;
 
 // Lista literal
 lista
     : COLCHETE_ABRE (expressao (VIRGULA expressao)*)? COLCHETE_FECHA
+    ;
+
+// Dicionário literal: { "key": expr, ... }
+dict_literal
+    : CHAVE_ABRE (dict_entries)? CHAVE_FECHA
+    ;
+
+dict_entries
+    : dict_entry (VIRGULA dict_entry)*
+    ;
+
+dict_entry
+    : STRING DOIS_PONTOS expressao
     ;

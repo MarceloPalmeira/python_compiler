@@ -5,21 +5,35 @@ import hashlib
 import json
 import os
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import sys
 import tempfile
-
-# Adiciona o diretório do compilador ao path
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'compiler', 'llvm'))
-from simple_minipar_compiler import SimpleMiniparCompiler
+import re
+import importlib.util
+import pathlib
 
 class CompilerService:
     def __init__(self):
         self.cache_dir = "cache"
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
-        # Inicializa o compilador MiniPar
-        self.minipar_compiler = SimpleMiniparCompiler()
+        # Initialize the MiniPar compiler implementation.
+        # We require a functional compiler at backend/compiler/simple_minipar_compiler.py
+        # that exposes at least `parse` and `tokenize`. Fail fast if not present so
+        # the project uses the single canonical compiler implementation.
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'compiler'))
+        sm_path = os.path.join(base_dir, 'simple_minipar_compiler.py')
+        if not os.path.exists(sm_path):
+            raise RuntimeError(f"Required compiler module not found: {sm_path}")
+
+        spec = importlib.util.spec_from_file_location('simple_minipar_compiler', sm_path)
+        sm_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sm_mod)
+        if not (hasattr(sm_mod, 'parse') and hasattr(sm_mod, 'tokenize') and hasattr(sm_mod, 'generate_tac')):
+            raise RuntimeError("simple_minipar_compiler.py must expose parse(), tokenize() and generate_tac()")
+
+        # Use the module object directly (functional API)
+        self.minipar_compiler = sm_mod
     
     def upload_code(self, source_code: str) -> str:
         """
@@ -56,29 +70,6 @@ class CompilerService:
         
         return cache_data.get("source_code")
     
-    def compile_to_llvm_ir(self, code_id: str) -> Optional[str]:
-        """
-        Compila código MiniPar para LLVM IR usando SimpleMiniparCompiler
-        """
-        source_code = self.get_code(code_id)
-        if not source_code:
-            return None
-        
-        try:
-            # Usa o compilador MiniPar para gerar LLVM IR
-            llvm_ir = self.minipar_compiler.compile_to_ir(source_code)
-            return llvm_ir
-        except Exception as e:
-            # Em caso de erro, retorna um IR básico com comentário do erro
-            return f"""; Erro na compilação: {str(e)}
-; Código fonte:
-; {source_code}
-
-define i32 @main() {{
-entry:
-    ret i32 1
-}}
-"""
     
     def get_syntax_tree(self, code_id: str) -> Optional[Dict]:
         """
@@ -111,61 +102,55 @@ entry:
             # Usa o compilador MiniPar para tokenizar
             tokens = self.minipar_compiler.tokenize(source_code)
             return tokens
+        except Exception:
+            # On error, return None so callers can handle failure uniformly.
+            return None
+
+    def compile_to_tac(self, code_id: str) -> Optional[List[str]]:
+        """
+        Gera código intermediário TAC a partir da AST do código MiniPar
+        """
+        source_code = self.get_code(code_id)
+        if not source_code:
+            return None
+
+        try:
+            ast = self.minipar_compiler.parse(source_code)
+            # Prefer the functional compiler's TAC generator directly
+            tac = self.minipar_compiler.generate_tac(ast)
+            return tac
         except Exception as e:
-            # Retorna tokenização básica em caso de erro
-            lines = source_code.split('\n')
-            tokens = []
-            
-            for line_num, line in enumerate(lines, 1):
-                words = line.strip().split()
-                col = 0
-                
-                for word in words:
-                    if word in ['var', 'func', 'print', 'if', 'else', 'while', 'for', 'return']:
-                        tokens.append({
-                            "type": "KEYWORD",
-                            "value": word,
-                            "line": line_num,
-                            "column": col
-                        })
-                    elif word in ['number', 'string', 'bool']:
-                        tokens.append({
-                            "type": "TYPE",
-                            "value": word,
-                            "line": line_num,
-                            "column": col
-                        })
-                    elif word.replace('.', '').isdigit():
-                        tokens.append({
-                            "type": "NUMBER",
-                            "value": word,
-                            "line": line_num,
-                            "column": col
-                        })
-                    elif word.startswith('"') and word.endswith('"'):
-                        tokens.append({
-                            "type": "STRING",
-                            "value": word,
-                            "line": line_num,
-                            "column": col
-                        })
-                    elif word in ['=', '+', '-', '*', '/', '(', ')', '{', '}', ':', ',']:
-                        tokens.append({
-                            "type": "OPERATOR",
-                            "value": word,
-                            "line": line_num,
-                            "column": col
-                        })
-                    else:
-                        tokens.append({
-                            "type": "IDENTIFIER",
-                            "value": word,
-                            "line": line_num,
-                            "column": col
-                        })
-                    col += len(word) + 1
-            
-            return tokens
+            return [f"; Erro gerando TAC: {str(e)}"]
+
+    def compile_tac_to_arm(self, code_id: str) -> Optional[str]:
+        """
+        Gera assembly ARM (compatível com CPULator) a partir do TAC gerado para o código.
+        """
+        source_code = self.get_code(code_id)
+        if not source_code:
+            return None
+
+        try:
+            # Gera AST -> TAC
+            ast = self.minipar_compiler.parse(source_code)
+            # Use the functional compiler's TAC generator directly
+            tac = self.minipar_compiler.generate_tac(ast)
+
+            # Load tac_to_arm (dynamic import) from the canonical file.
+            # We removed the development-only fallback so the service always
+            # loads `tac_to_arm.py` present in the compiler directory.
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'compiler'))
+            # use the canonical functional TAC->ARM translator module
+            tac2arm_path = os.path.join(base_dir, 'tac_to_arm.py')
+            spec2 = importlib.util.spec_from_file_location('tac_to_arm', tac2arm_path)
+            tac2arm_mod = importlib.util.module_from_spec(spec2)
+            spec2.loader.exec_module(tac2arm_mod)
+
+            # Our tac_to_arm module exposes tac_to_arm(tac: List[str]) -> str
+            asm = tac2arm_mod.tac_to_arm(tac)
+            return asm
+        except Exception as e:
+            return f"; Erro gerando ARM a partir do TAC: {str(e)}"
     
     def get_symbols_table(self, code_id: str) -> Optional[Dict]:
         """
@@ -176,62 +161,13 @@ entry:
             return None
         
         try:
-            # Usa o compilador MiniPar para gerar tabela de símbolos
-            symbols = self.minipar_compiler.get_symbols_table(source_code)
-            return symbols
-        except Exception as e:
-            # Análise básica em caso de erro
-            symbols = {
-                "variables": [],
-                "functions": [],
-                "error": str(e)
-            }
-            
-            # Busca por declarações de variáveis
-            lines = source_code.split('\n')
-            for line_num, line in enumerate(lines, 1):
-                line = line.strip()
-                if line.startswith('var '):
-                    parts = line.split()
-                    if len(parts) >= 4:
-                        var_name = parts[1].rstrip(':')
-                        var_type = parts[2]
-                        symbols["variables"].append({
-                            "name": var_name,
-                            "type": var_type,
-                            "line": line_num,
-                            "scope": "global"
-                        })
-                elif line.startswith('func '):
-                    func_name = line.split('(')[0].replace('func ', '').strip()
-                    symbols["functions"].append({
-                        "name": func_name,
-                        "line": line_num,
-                        "scope": "global"
-                    })
-            
-            return symbols
-    
-    def get_complexity_analysis(self, code_id: str) -> Optional[Dict]:
-        """
-        Gera análise de complexidade
-        """
-        source_code = self.get_code(code_id)
-        if not source_code:
+            # Our functional compiler provides semantic_check(ast) which
+            # returns symbols and errors. Use that to produce the symbol table.
+            ast = self.minipar_compiler.parse(source_code)
+            sem = self.minipar_compiler.semantic_check(ast)
+            return sem.get("symbols")
+        except Exception:
             return None
-        
-        # Placeholder para análise de complexidade
-        return {
-            "time_complexity": "O(1)",
-            "space_complexity": "O(1)",
-            "analysis": {
-                "loops": 0,
-                "recursive_calls": 0,
-                "function_calls": 0,
-                "conditional_statements": 0
-            },
-            "details": "Programa simples com função main que retorna constante."
-        }
-
+    
 # Instância global do serviço
 compiler_service = CompilerService()

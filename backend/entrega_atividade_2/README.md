@@ -23,7 +23,7 @@ Este diretório contém todos os materiais relacionados à **Atividade 2** do cu
 
 ✅ **Analisador Léxico (Lexer)** - Tokenização completa do MiniPar
 ✅ **Analisador Sintático (Parser)** - Geração de AST estruturada
-✅ **Geração de Código Intermediário** - LLVM IR (código de três endereços)
+✅ **Geração de Código Intermediário** - TAC (three-address code, textual IR)
 ✅ **Interface Textual** - API REST completa
 ✅ **Conformidade com Tema 1** - Compilador MiniPar 2025.1
 
@@ -34,7 +34,7 @@ Para demonstrar os componentes implementados, use os seguintes endpoints da API:
 1. **Upload**: `POST /compiler/upload` - Envio do código MiniPar
 2. **Lexer**: `GET /compiler/{id}/token` - Análise léxica
 3. **Parser**: `GET /compiler/{id}/syntax` - Análise sintática
-4. **Código Intermediário**: `GET /compiler/{id}/llvm/ir` - LLVM IR
+4. **Código Intermediário**: `GET /compiler/{id}/tac` - TAC (three-address code)
 
 ## 📖 Documentação
 
