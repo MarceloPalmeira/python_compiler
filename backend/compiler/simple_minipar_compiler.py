@@ -26,9 +26,23 @@ TOKEN_SPEC = [
     ("STRING", r'"[^"\\]*(?:\\.[^"\\]*)*"'),
     ("COMMENT", r"#.*"),
     ("ID", r"\b[a-zA-Z_][a-zA-Z0-9_]*\b"),
+    # Operadores relacionais (ordem importante - >= antes de >)
+    ("GTE", r">="),
+    ("LTE", r"<="),
+    ("EQ", r"=="),
+    ("NEQ", r"!="),
+    ("GT", r">"),
+    ("LT", r"<"),
+    # Operadores lógicos
+    ("AND", r"&&"),
+    ("OR", r"\|\|"),
+    ("NOT", r"!"),
+    # Atribuição e setas
     ("ASSIGN", r"="),
     ("ARROW", r"->"),
+    # Operadores aritméticos
     ("OP", r"[+\-*/%]"),
+    # Símbolos
     ("COLON", r":"),
     ("LBRACKET", r"\["),
     ("RBRACKET", r"\]"),
@@ -45,7 +59,10 @@ TOKEN_SPEC = [
 
 MASTER_RE = re.compile("|".join(f"(?P<{name}>{pattern})" for name, pattern in TOKEN_SPEC))
 
-KEYWORDS = {"var", "func", "return", "print"}
+KEYWORDS = {
+    "var", "func", "return", "print", "if", "else", "while", "for", 
+    "break", "continue", "true", "false", "in", "par", "seq"
+}
 
 
 def tokenize(src: str) -> List[Dict[str, Any]]:
@@ -234,6 +251,77 @@ def parse(src: str) -> Dict[str, Any]:
             ts.accept("SEMICOLON")
             return {"type": "ReturnStatement", "argument": expr}
 
+        if p["type"] == "IF":
+            ts.next()
+            ts.expect("LPAREN")
+            condition = parse_expression()
+            ts.expect("RPAREN")
+            ts.expect("LBRACE")
+            then_body = []
+            while ts.peek()["type"] != "RBRACE":
+                then_body.append(parse_statement())
+            ts.expect("RBRACE")
+            
+            # Optional else
+            else_body = None
+            if ts.accept("ELSE"):
+                ts.expect("LBRACE")
+                else_body = []
+                while ts.peek()["type"] != "RBRACE":
+                    else_body.append(parse_statement())
+                ts.expect("RBRACE")
+            
+            return {"type": "IfStatement", "test": condition, "consequent": then_body, "alternate": else_body}
+
+        if p["type"] == "WHILE":
+            ts.next()
+            ts.expect("LPAREN")
+            condition = parse_expression()
+            ts.expect("RPAREN")
+            ts.expect("LBRACE")
+            body = []
+            while ts.peek()["type"] != "RBRACE":
+                body.append(parse_statement())
+            ts.expect("RBRACE")
+            return {"type": "WhileStatement", "test": condition, "body": body}
+
+        if p["type"] == "FOR":
+            ts.next()
+            ts.expect("LPAREN")
+            ts.expect("VAR")
+            var_name = ts.expect("ID")["value"]
+            ts.accept("COLON")  # optional type annotation
+            if ts.peek()["type"] == "ID":
+                ts.next()  # consume type
+            ts.expect("IN")
+            iterable = parse_expression()
+            ts.expect("RPAREN")
+            ts.expect("LBRACE")
+            body = []
+            while ts.peek()["type"] != "RBRACE":
+                body.append(parse_statement())
+            ts.expect("RBRACE")
+            return {"type": "ForStatement", "variable": var_name, "iterable": iterable, "body": body}
+
+        if p["type"] == "BREAK":
+            ts.next()
+            ts.accept("SEMICOLON")
+            return {"type": "BreakStatement"}
+
+        if p["type"] == "CONTINUE":
+            ts.next()
+            ts.accept("SEMICOLON")
+            return {"type": "ContinueStatement"}
+
+        if p["type"] == "PAR":
+            ts.next()
+            ts.expect("LBRACE")
+            body = []
+            while ts.peek()["type"] != "RBRACE":
+                body.append(parse_statement())
+            ts.expect("RBRACE")
+            return {"type": "ParallelBlock", "body": body}
+
         if p["type"] == "ID" and p["value"] == "print":
             # should be handled above as ID LPAREN, but keeping for safety
             pass
@@ -248,22 +336,79 @@ def parse(src: str) -> Dict[str, Any]:
         return {"type": "ExpressionStatement", "expression": expr}
 
     def parse_expression():
-        return parse_term()
+        return parse_logical_or()
 
-    def parse_term():
-        node = parse_factor()
-        while ts.peek()["type"] == "OP":
+    def parse_logical_or():
+        node = parse_logical_and()
+        while ts.peek()["type"] == "OR":
             op = ts.next()["value"]
-            right = parse_factor()
+            right = parse_logical_and()
             node = {"type": "BinaryExpression", "operator": op, "left": node, "right": right}
         return node
 
-    def parse_factor():
+    def parse_logical_and():
+        node = parse_equality()
+        while ts.peek()["type"] == "AND":
+            op = ts.next()["value"]
+            right = parse_equality()
+            node = {"type": "BinaryExpression", "operator": op, "left": node, "right": right}
+        return node
+
+    def parse_equality():
+        node = parse_relational()
+        while ts.peek()["type"] in ("EQ", "NEQ"):
+            op = ts.next()["value"]
+            right = parse_relational()
+            node = {"type": "BinaryExpression", "operator": op, "left": node, "right": right}
+        return node
+
+    def parse_relational():
+        node = parse_additive()
+        while ts.peek()["type"] in ("LT", "LTE", "GT", "GTE"):
+            op = ts.next()["value"]
+            right = parse_additive()
+            node = {"type": "BinaryExpression", "operator": op, "left": node, "right": right}
+        return node
+
+    def parse_additive():
+        node = parse_multiplicative()
+        while ts.peek()["type"] == "OP" and ts.peek()["value"] in ("+", "-"):
+            op = ts.next()["value"]
+            right = parse_multiplicative()
+            node = {"type": "BinaryExpression", "operator": op, "left": node, "right": right}
+        return node
+
+    def parse_multiplicative():
+        node = parse_unary()
+        while ts.peek()["type"] == "OP" and ts.peek()["value"] in ("*", "/", "%"):
+            op = ts.next()["value"]
+            right = parse_unary()
+            node = {"type": "BinaryExpression", "operator": op, "left": node, "right": right}
+        return node
+
+    def parse_unary():
+        if ts.peek()["type"] == "NOT":
+            op = ts.next()["value"]
+            expr = parse_unary()
+            return {"type": "UnaryExpression", "operator": op, "argument": expr}
+        if ts.peek()["type"] == "OP" and ts.peek()["value"] in ("+", "-"):
+            op = ts.next()["value"]
+            expr = parse_unary()
+            return {"type": "UnaryExpression", "operator": op, "argument": expr}
+        return parse_primary()
+
+    def parse_primary():
         p = ts.peek()
         if p["type"] == "NUMBER":
             return {"type": "Literal", "value": ts.next()["value"]}
         if p["type"] == "STRING":
             return {"type": "Literal", "value": ts.next()["value"]}
+        if p["type"] == "TRUE":
+            ts.next()
+            return {"type": "Literal", "value": "true"}
+        if p["type"] == "FALSE":
+            ts.next()
+            return {"type": "Literal", "value": "false"}
         if p["type"] == "ID":
             idt = ts.next()["value"]
             if ts.peek()["type"] == "LPAREN":
@@ -297,7 +442,7 @@ def parse(src: str) -> Dict[str, Any]:
             ts.expect("RPAREN")
             return node
 
-        raise SyntaxError(f"Unexpected token in factor: {p}")
+        raise SyntaxError(f"Unexpected token in primary: {p}")
 
     return parse_program()
 
@@ -436,6 +581,11 @@ def generate_tac(ast: Dict[str, Any]) -> List[str]:
             ret_tmp = new_temp()
             emit(f"{ret_tmp} = call {expr['callee']} , {len(args)}")
             return ret_tmp
+        if t == "UnaryExpression":
+            operand = expr_to_tac(expr["argument"])
+            tmp = new_temp()
+            emit(f"{tmp} = {expr['operator']}{operand}")
+            return tmp
 
         # fallback
         tmp = new_temp()
@@ -443,6 +593,7 @@ def generate_tac(ast: Dict[str, Any]) -> List[str]:
         return tmp
 
     def gen_statement(node):
+        nonlocal label_counter
         t = node.get("type")
         if t == "VariableDeclaration":
             name = node["name"]
@@ -481,6 +632,77 @@ def generate_tac(ast: Dict[str, Any]) -> List[str]:
         elif t == "ReturnStatement":
             val = expr_to_tac(node.get("argument"))
             emit(f"ret {val}")
+        elif t == "IfStatement":
+            else_label = f"L{label_counter}"
+            label_counter += 1
+            end_label = f"L{label_counter}"
+            label_counter += 1
+            
+            # Evaluate condition
+            cond = expr_to_tac(node["test"])
+            emit(f"if_false {cond} goto {else_label}")
+            
+            # Then branch
+            for stmt in node.get("consequent", []):
+                gen_statement(stmt)
+            emit(f"goto {end_label}")
+            
+            # Else branch
+            emit(f"{else_label}:")
+            if node.get("alternate"):
+                for stmt in node["alternate"]:
+                    gen_statement(stmt)
+            
+            emit(f"{end_label}:")
+            
+        elif t == "WhileStatement":
+            loop_start = f"L{label_counter}"
+            label_counter += 1
+            loop_end = f"L{label_counter}"
+            label_counter += 1
+            
+            emit(f"{loop_start}:")
+            cond = expr_to_tac(node["test"])
+            emit(f"if_false {cond} goto {loop_end}")
+            
+            for stmt in node.get("body", []):
+                gen_statement(stmt)
+            
+            emit(f"goto {loop_start}")
+            emit(f"{loop_end}:")
+            
+        elif t == "ForStatement":
+            loop_start = f"L{label_counter}"
+            label_counter += 1
+            loop_end = f"L{label_counter}"
+            label_counter += 1
+            
+            # For now, treat as simple iteration over a range
+            # This is a simplified implementation
+            iterable = expr_to_tac(node["iterable"])
+            var_name = node["variable"]
+            emit(f"for_init {var_name} {iterable}")
+            emit(f"{loop_start}:")
+            emit(f"for_check {var_name} goto {loop_end}")
+            
+            for stmt in node.get("body", []):
+                gen_statement(stmt)
+            
+            emit(f"for_next {var_name}")
+            emit(f"goto {loop_start}")
+            emit(f"{loop_end}:")
+            
+        elif t == "BreakStatement":
+            emit("break")
+            
+        elif t == "ContinueStatement":
+            emit("continue")
+            
+        elif t == "ParallelBlock":
+            emit("par_start")
+            for stmt in node.get("body", []):
+                gen_statement(stmt)
+            emit("par_end")
         else:
             # recursively handle nested shapes
             for k, v in node.items():
