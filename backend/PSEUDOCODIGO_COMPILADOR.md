@@ -1088,6 +1088,226 @@ classe Compiler:
 
 ---
 
+## 7. Geração de Código de Máquina (TAC -> ARM)
+
+### Interface MachineCodeGenerator
+```
+interface MachineCodeGenerator:
+    método tac_to_arm(tac: lista[string]) -> string  # retorna assembly ARM textual
+```
+
+### Observações de Design
+- Registradores: r0..r3 para argumentos/retorno; r4..r11 para temporários; r12 para spill.
+- Prólogo de função: `push {r4-r11, lr}`; epílogo: `pop {r4-r11, pc}`.
+- Chamada de função: até 4 args em r0..r3, extras empilhados (direita→esquerda), depois `bl nome`.
+- Limpeza de pilha após chamada: `add sp, sp, #(args_extras*4)`.
+- Literais imediatos usam `mov rX, #imm`.
+- Instruções TAC não suportadas explicitamente são comentadas como fallback.
+
+### Classe TACToARMTranslator implementa MachineCodeGenerator
+```
+classe TACToARMTranslator implementa MachineCodeGenerator:
+    asm_lines: lista[string]
+    reg_map: dicionário[string, string]
+    next_reg: inteiro  # inicia em 4
+    param_buffer: lista[string]
+    in_function: booleano
+    function_returned: booleano
+
+    método inicialização():
+        asm_lines = []
+        reg_map = {}
+        next_reg = 4
+        param_buffer = []
+        in_function = False
+        function_returned = False
+
+    método alloc_reg(name: string) -> string:
+        se name em reg_map:
+            retorna reg_map[name]
+        se next_reg < 12:
+            r = "r" + str(next_reg)
+            reg_map[name] = r
+            next_reg += 1
+            retorna r
+        reg_map[name] = "r12"   # spill
+        retorna "r12"
+
+    método emit(line: string):
+        asm_lines.append(line)
+
+    método tac_to_arm(tac: lista[string]) -> string:
+        # Cabeçalho
+        emit('.text')
+        emit('.global _start')
+        emit('')
+        emit('_start:')
+
+        para cada instr em tac:
+            instr = trim(instr)
+            se instr vazio: continue
+
+            # Comentários TAC
+            se instr começa_com ';':
+                emit("    @ " + instr[1:].trim())
+                continue
+
+            # Buffer de parâmetros: "param X"
+            se casa_regex('^param\\s+(.*)$', instr) como m:
+                param_buffer.append(m.grupo(1))
+                continue
+
+            # Chamadas: "tK = call fname , N" ou "call fname , N"
+            se casa_regex('^(\\w+)\\s*=\\s*call\\s+(\\w+)\\s*,\\s*(\\d+)$', instr) como ac:
+                target = ac.grupo(1); fname = ac.grupo(2); argc = int(ac.grupo(3))
+            senão se casa_regex('^call\\s+(\\w+)\\s*,\\s*(\\d+)$', instr) como c:
+                target = None; fname = c.grupo(1); argc = int(c.grupo(2))
+            senão:
+                target = '__NO_CALL__'
+
+            se target != '__NO_CALL__':
+                # Move até 4 args para r0..r3
+                para i de 0 até min(argc, 4)-1:
+                    se i >= tamanho(param_buffer): quebra
+                    val = param_buffer[i]
+                    se é_inteiro(val):
+                        emit(f"    mov r{i}, #{val}")
+                    senão:
+                        rs = alloc_reg(val)
+                        emit(f"    mov r{i}, {rs}")
+
+                # Empilha args extras (direita→esquerda)
+                se argc > 4:
+                    para j de argc-1 até 4 passo -1:
+                        se j >= tamanho(param_buffer): quebra
+                        v = param_buffer[j]
+                        se é_inteiro(v):
+                            emit('    mov r12, #' + v)
+                            emit('    push {r12}')
+                        senão:
+                            rv = alloc_reg(v)
+                            emit(f"    push {{{rv}}}")
+
+                # Chamada
+                se fname == 'print':
+                    emit(f"    @ call print (placeholder), argc={argc}")
+                senão:
+                    emit(f"    bl {fname}")
+
+                # Limpeza de pilha
+                se argc > 4:
+                    cleanup = (argc - 4) * 4
+                    emit(f"    add sp, sp, #{cleanup}    @ cleanup {argc-4} pushed args")
+
+                # Captura retorno
+                se target não é None:
+                    rd = alloc_reg(target)
+                    emit(f"    mov {rd}, r0     @ {target} = return")
+
+                param_buffer = []
+                continue
+
+            # Retorno: "ret X" ou "return X"
+            se casa_regex('^(?:return|ret)(?:\\s+(.*))?$', instr) como r:
+                val = r.grupo(1)
+                se val:
+                    se é_inteiro(val): emit(f"    mov r0, #{val}")
+                    senão:
+                        rv = alloc_reg(val)
+                        emit(f"    mov r0, {rv}")
+                se in_function:
+                    emit('    pop {r4-r11, pc}')
+                    function_returned = True
+                senão:
+                    emit('')
+                    emit('    @ Exit program (return)')
+                    emit('    mov r7, #1')
+                    emit('    swi 0')
+                continue
+
+            # Início de função: "func nome"
+            se casa_regex('^func\\s+(\\w+)$', instr) como f:
+                emit(f.grupo(1) + ':')
+                emit('    push {r4-r11, lr}')
+                in_function = True
+                function_returned = False
+                continue
+
+            # Fim de função: "endfunc nome"
+            se casa_regex('^endfunc\\s+(\\w+)$', instr):
+                se in_function e não function_returned:
+                    emit('    pop {r4-r11, pc}')
+                in_function = False
+                function_returned = False
+                continue
+
+            # Atribuições simples e mapeamento de parâmetros: "x = y" | "x = 42" | "x = rN"
+            se casa_regex('^(\\w+)\\s*=\\s*(\\w+|\\d+|r\\d+)$', instr) como a:
+                left = a.grupo(1); right = a.grupo(2)
+                se começa_com(right, 'r') e é_reg(right):
+                    reg_map[left] = right
+                    emit(f"    @ {left} mapped to {right}")
+                senão se é_inteiro(right):
+                    rd = alloc_reg(left)
+                    emit(f"    mov {rd}, #{right}     @ {left} = {right}")
+                senão:
+                    rs = alloc_reg(right)
+                    rd = alloc_reg(left)
+                    emit(f"    mov {rd}, {rs}     @ {left} = {right}")
+                continue
+
+            # Operações binárias: "tK = a + b" | "-" | "*" | ("/" placeholder)
+            se casa_regex('^(t\\d+)\\s*=\\s*(\\w+)\\s*([+\\-*/])\\s*(\\w+|\\d+)$', instr) como b:
+                tmp = b.grupo(1); a1 = b.grupo(2); op = b.grupo(3); b1 = b.grupo(4)
+                se é_inteiro(a1): ra = alloc_reg('_lit_' + a1); emit(f"    mov {ra}, #{a1}")
+                senão: ra = alloc_reg(a1)
+                se é_inteiro(b1): rb = alloc_reg('_lit_' + b1); emit(f"    mov {rb}, #{b1}")
+                senão: rb = alloc_reg(b1)
+                rt = alloc_reg(tmp)
+                se op == '+': emit(f"    add {rt}, {ra}, {rb}     @ {tmp} = {a1} + {b1}")
+                senão se op == '-': emit(f"    sub {rt}, {ra}, {rb}     @ {tmp} = {a1} - {b1}")
+                senão se op == '*': emit(f"    mul {rt}, {ra}, {rb}     @ {tmp} = {a1} * {b1}")
+                senão: emit(f"    @ div not implemented; mov {rt}, {ra}"); emit(f"    mov {rt}, {ra}")
+                continue
+
+            # Fallback
+            emit('    @ unhandled TAC: ' + instr)
+
+        # Epílogo do programa
+        emit('')
+        emit('    @ Exit program (end)')
+        emit('    mov r7, #1')
+        emit('    mov r0, #0')
+        emit('    swi 0')
+
+        retorna junta_com_quebras(asm_lines)
+```
+
+### Exemplo de Mapeamento (TAC → ARM)
+```
+TAC:
+    t1 = 40 + 2
+    x = t1
+    param x
+    call print , 1
+    ret 0
+
+ARM (esboço):
+    mov r4, #40
+    mov r5, #2
+    add r6, r4, r5     @ t1 = 40 + 2
+    mov r7, r6         @ x = t1
+    mov r0, r7         @ arg0
+    @ call print (placeholder), argc=1
+    
+    mov r0, #0
+    @ Exit program (return)
+    mov r7, #1
+    swi 0
+```
+
+---
+
 ## Notas Finais
 
 Este pseudo-código apresenta a arquitetura do compilador MiniPar de forma simplificada e didática. O compilador segue o pipeline clássico:
