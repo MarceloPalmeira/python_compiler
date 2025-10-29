@@ -2,24 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCodeContext } from '../contexts/CodeContext';
 import TokenViewer from '../components/TokenViewer';
+import SymbolTable from '../components/SymbolTable';
 import compilerAPI from '../services/api';
 
 function LexicalPage() {
   const { currentCodeId } = useCodeContext();
   const [tokens, setTokens] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [tokensLoading, setTokensLoading] = useState(false);
+  const [tokensError, setTokensError] = useState(null);
+  const [symbols, setSymbols] = useState(null);
+  const [symbolsLoading, setSymbolsLoading] = useState(false);
+  const [symbolsError, setSymbolsError] = useState(null);
 
   useEffect(() => {
-    if (currentCodeId) {
-      setLoading(true);
-      setError(null);
-      
-      compilerAPI.getTokens(currentCodeId)
-        .then(setTokens)
-        .catch(err => setError(err.message))
-        .finally(() => setLoading(false));
-    }
+    if (!currentCodeId) return;
+
+    setTokensLoading(true);
+    setTokensError(null);
+    setSymbolsLoading(true);
+    setSymbolsError(null);
+
+    compilerAPI.getTokens(currentCodeId)
+      .then(setTokens)
+      .catch(err => setTokensError(err.message))
+      .finally(() => setTokensLoading(false));
+
+    compilerAPI.getSymbolsTable(currentCodeId)
+      .then(setSymbols)
+      .catch(err => setSymbolsError(err.message))
+      .finally(() => setSymbolsLoading(false));
   }, [currentCodeId]);
 
   if (!currentCodeId) {
@@ -47,7 +58,10 @@ function LexicalPage() {
       transition={{ duration: 0.5 }}
       className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden p-6"
     >
-      <TokenViewer tokens={tokens} codeId={currentCodeId} loading={loading} error={error} />
+      <div className="space-y-6">
+        <TokenViewer tokens={tokens} codeId={currentCodeId} loading={tokensLoading} error={tokensError} />
+        <SymbolTable symbols={symbols} codeId={currentCodeId} loading={symbolsLoading} error={symbolsError} />
+      </div>
     </motion.div>
   );
 }
