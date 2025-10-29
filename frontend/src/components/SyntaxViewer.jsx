@@ -13,7 +13,10 @@ import {
 } from 'lucide-react';
 
 function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
-  const { treeData, parseError } = useMemo(() => parseSyntaxTreeInput(syntaxTree), [syntaxTree]);
+  const { treeData, parseError } = useMemo(
+    () => parseSyntaxTreeInput(syntaxTree),
+    [syntaxTree],
+  );
 
   const [expandedNodes, setExpandedNodes] = useState(() => new Set(['root']));
 
@@ -34,7 +37,10 @@ function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
   }, []);
 
   const downloadSyntaxTree = () => {
-    const data = typeof syntaxTree === 'string' ? syntaxTree : JSON.stringify(syntaxTree, null, 2);
+    const data =
+      typeof syntaxTree === 'string'
+        ? syntaxTree
+        : JSON.stringify(syntaxTree, null, 2);
     const blob = new Blob([data], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -54,7 +60,7 @@ function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
       >
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         >
           <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4" />
         </motion.div>
@@ -94,9 +100,7 @@ function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
         <h3 className="text-xl font-semibold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
           Erro ao Carregar Árvore Sintática
         </h3>
-        <p className="text-red-600 mb-4 font-medium">
-          {error}
-        </p>
+        <p className="text-red-600 mb-4 font-medium">{error}</p>
         <p className="text-sm text-apple-gray-600 bg-white/50 px-4 py-2 rounded-lg inline-block">
           Verifique se o código foi compilado corretamente
         </p>
@@ -135,9 +139,10 @@ function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
     );
   }
 
-  const syntaxTreeString = typeof syntaxTree === 'string'
-    ? syntaxTree
-    : JSON.stringify(syntaxTree, null, 2);
+  const syntaxTreeString =
+    typeof syntaxTree === 'string'
+      ? syntaxTree
+      : JSON.stringify(syntaxTree, null, 2);
 
   return (
     <div className="space-y-6">
@@ -247,21 +252,19 @@ function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
             />
           ) : (
             <div className="text-sm text-apple-gray-500 bg-red-50 border border-red-200 rounded-lg p-4">
-              {parseError
-                ? (
-                  <>
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertCircle className="w-4 h-4 text-red-500" />
-                      <span className="font-semibold text-red-700">
-                        Não foi possível exibir a árvore sintática
-                      </span>
-                    </div>
-                    <span className="text-red-600 text-xs">
-                      {parseError}
+              {parseError ? (
+                <>
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="w-4 h-4 text-red-500" />
+                    <span className="font-semibold text-red-700">
+                      Não foi possível exibir a árvore sintática
                     </span>
-                  </>
-                )
-                : 'A árvore sintática está vazia.'}
+                  </div>
+                  <span className="text-red-600 text-xs">{parseError}</span>
+                </>
+              ) : (
+                'A árvore sintática está vazia.'
+              )}
             </div>
           )}
         </div>
@@ -337,9 +340,10 @@ function SyntaxViewer({ syntaxTree, codeId, loading, error }) {
           Sobre a Árvore Sintática
         </h3>
         <p className="text-sm text-blue-800 leading-relaxed">
-          A árvore sintática abstrata (AST) representa a estrutura hierárquica do seu código.
-          Cada nó representa uma construção sintática como expressões, declarações e comandos.
-          Use as cores para identificar rapidamente diferentes tipos de elementos no código.
+          A árvore sintática abstrata (AST) representa a estrutura hierárquica
+          do seu código. Cada nó representa uma construção sintática como
+          expressões, declarações e comandos. Use as cores para identificar
+          rapidamente diferentes tipos de elementos no código.
         </p>
       </motion.div>
     </div>
@@ -494,7 +498,8 @@ function parseSyntaxTreeInput(rawSyntaxTree) {
 
   return {
     treeData: null,
-    parseError: lastError || 'Erro desconhecido ao interpretar a árvore sintática.',
+    parseError:
+      lastError || 'Erro desconhecido ao interpretar a árvore sintática.',
   };
 }
 
@@ -522,9 +527,10 @@ function getNodeStyles({ nodeKey, isBranch, isArray, value }) {
   }
 
   if (isBranch) {
-    const typeName = value && typeof value === 'object' && typeof value.type === 'string'
-      ? value.type
-      : null;
+    const typeName =
+      value && typeof value === 'object' && typeof value.type === 'string'
+        ? value.type
+        : null;
 
     if (typeName) {
       return {
@@ -804,15 +810,27 @@ function getTypeColorTokens(typeName) {
     return palette.literal;
   }
 
-  if (normalized.includes('operator') || normalized.includes('binary') || normalized.includes('unary')) {
+  if (
+    normalized.includes('operator') ||
+    normalized.includes('binary') ||
+    normalized.includes('unary')
+  ) {
     return palette.operator;
   }
 
-  if (normalized.includes('function') || normalized.includes('method') || normalized.includes('call')) {
+  if (
+    normalized.includes('function') ||
+    normalized.includes('method') ||
+    normalized.includes('call')
+  ) {
     return palette.function;
   }
 
-  if (normalized.includes('identifier') || normalized.includes('name') || normalized.includes('variable')) {
+  if (
+    normalized.includes('identifier') ||
+    normalized.includes('name') ||
+    normalized.includes('variable')
+  ) {
     return palette.identifier;
   }
 
@@ -820,9 +838,15 @@ function getTypeColorTokens(typeName) {
     return palette.type;
   }
 
-  if (normalized.includes('if') || normalized.includes('else') || normalized.includes('switch') || 
-      normalized.includes('case') || normalized.includes('return') || normalized.includes('break') || 
-      normalized.includes('continue')) {
+  if (
+    normalized.includes('if') ||
+    normalized.includes('else') ||
+    normalized.includes('switch') ||
+    normalized.includes('case') ||
+    normalized.includes('return') ||
+    normalized.includes('break') ||
+    normalized.includes('continue')
+  ) {
     return palette.control;
   }
 
@@ -830,11 +854,19 @@ function getTypeColorTokens(typeName) {
     return palette.block;
   }
 
-  if (normalized.includes('while') || normalized.includes('for') || normalized.includes('loop')) {
+  if (
+    normalized.includes('while') ||
+    normalized.includes('for') ||
+    normalized.includes('loop')
+  ) {
     return palette.loop;
   }
 
-  if (normalized.includes('param') || normalized.includes('argument') || normalized.includes('arg')) {
+  if (
+    normalized.includes('param') ||
+    normalized.includes('argument') ||
+    normalized.includes('arg')
+  ) {
     return palette.parameter;
   }
 
@@ -879,15 +911,21 @@ function TreeNode({ nodeKey, value, path, depth, expandedNodes, toggleNode }) {
   const nodeStyles = getNodeStyles({ nodeKey, isBranch, isArray, value });
   const SecondaryIcon = isBranch ? GitBranch : FileCode;
   const ToggleIcon = isExpanded ? ChevronDown : ChevronRight;
-  const rowHoverClass = nodeStyles.rowHover || (isBranch ? 'hover:bg-apple-gray-50' : '');
+  const rowHoverClass =
+    nodeStyles.rowHover || (isBranch ? 'hover:bg-apple-gray-50' : '');
   const rowBackgroundClass = nodeStyles.rowBackground || 'bg-white';
-  const iconClass = nodeStyles.iconClass || (isBranch ? 'text-apple-blue' : 'text-apple-gray-400');
-  const metaTextClass = nodeStyles.metaText || (isBranch ? 'text-apple-gray-500' : 'text-apple-gray-400');
+  const iconClass =
+    nodeStyles.iconClass ||
+    (isBranch ? 'text-apple-blue' : 'text-apple-gray-400');
+  const metaTextClass =
+    nodeStyles.metaText ||
+    (isBranch ? 'text-apple-gray-500' : 'text-apple-gray-400');
   const valueColorClass = nodeStyles.valueColor || 'text-apple-gray-500';
   const badgeLabel = nodeStyles.badgeLabel;
   const badgeBgClass = nodeStyles.badgeBg || 'bg-apple-gray-100';
   const badgeTextClass = nodeStyles.badgeText || 'text-apple-gray-600';
-  const toggleButtonClasses = nodeStyles.toggleButtonClasses || 'hover:bg-slate-100 text-slate-500';
+  const toggleButtonClasses =
+    nodeStyles.toggleButtonClasses || 'hover:bg-slate-100 text-slate-500';
 
   return (
     <motion.div
@@ -896,10 +934,13 @@ function TreeNode({ nodeKey, value, path, depth, expandedNodes, toggleNode }) {
       transition={{ duration: 0.2, delay: depth * 0.02 }}
     >
       <div
-        style={{ 
-          marginLeft: depth * 16, 
+        style={{
+          marginLeft: depth * 16,
           borderLeftColor: nodeStyles.accent || 'rgba(148, 163, 184, 0.5)',
-          boxShadow: isExpanded && isBranch ? `0 0 0 1px ${nodeStyles.accent}15` : 'none'
+          boxShadow:
+            isExpanded && isBranch
+              ? `0 0 0 1px ${nodeStyles.accent}15`
+              : 'none',
         }}
         className={`flex items-start gap-2 rounded-xl border-l-2 px-3 py-2 transition-all duration-200 ${rowBackgroundClass} ${rowHoverClass}`}
       >
@@ -928,7 +969,9 @@ function TreeNode({ nodeKey, value, path, depth, expandedNodes, toggleNode }) {
             whileHover={{ scale: 1.1, rotate: 5 }}
             transition={{ duration: 0.2 }}
           >
-            <SecondaryIcon className={`h-4 w-4 flex-shrink-0 mt-0.5 ${iconClass}`} />
+            <SecondaryIcon
+              className={`h-4 w-4 flex-shrink-0 mt-0.5 ${iconClass}`}
+            />
           </motion.div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-baseline gap-2">
@@ -936,7 +979,7 @@ function TreeNode({ nodeKey, value, path, depth, expandedNodes, toggleNode }) {
                 {nodeKey}
               </span>
               {badgeLabel && (
-                <motion.span 
+                <motion.span
                   className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${badgeBgClass} ${badgeTextClass}`}
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.15 }}
@@ -958,7 +1001,7 @@ function TreeNode({ nodeKey, value, path, depth, expandedNodes, toggleNode }) {
       </div>
 
       {isBranch && isExpanded && (
-        <motion.div 
+        <motion.div
           className="space-y-1"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
@@ -966,7 +1009,10 @@ function TreeNode({ nodeKey, value, path, depth, expandedNodes, toggleNode }) {
           transition={{ duration: 0.2 }}
         >
           {(isArray ? value : Object.entries(value || {})).length === 0 && (
-            <div className="text-xs text-apple-gray-400 italic" style={{ paddingLeft: (depth + 1) * 16 + 12 }}>
+            <div
+              className="text-xs text-apple-gray-400 italic"
+              style={{ paddingLeft: (depth + 1) * 16 + 12 }}
+            >
               (vazio)
             </div>
           )}
@@ -1014,7 +1060,11 @@ function formatPrimitive(value) {
     return `"${trimmed}"`;
   }
 
-  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+  if (
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    typeof value === 'bigint'
+  ) {
     return String(value);
   }
 
@@ -1053,4 +1103,3 @@ function formatObjectSummary(obj) {
 
   return `{${keys.slice(0, 2).join(', ')}, +${keys.length - 2}}`;
 }
-

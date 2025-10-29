@@ -18,10 +18,11 @@ function CTEPage() {
 
     setTacLoading(true);
     setTacError(null);
-    
-    compilerAPI.getTAC(currentCodeId)
+
+    compilerAPI
+      .getTAC(currentCodeId)
       .then(setTacCode)
-      .catch(err => setTacError(err.message))
+      .catch((err) => setTacError(err.message))
       .finally(() => setTacLoading(false));
   }, [currentCodeId]);
 
@@ -61,4 +62,3 @@ function CTEPage() {
 }
 
 export default CTEPage;
-

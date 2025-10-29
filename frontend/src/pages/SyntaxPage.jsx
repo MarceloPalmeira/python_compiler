@@ -14,10 +14,11 @@ function SyntaxPage() {
     if (currentCodeId) {
       setLoading(true);
       setError(null);
-      
-      compilerAPI.getSyntaxTree(currentCodeId)
+
+      compilerAPI
+        .getSyntaxTree(currentCodeId)
         .then(setSyntaxTree)
-        .catch(err => setError(err.message))
+        .catch((err) => setError(err.message))
         .finally(() => setLoading(false));
     }
   }, [currentCodeId]);
@@ -47,10 +48,14 @@ function SyntaxPage() {
       transition={{ duration: 0.5 }}
       className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden p-6"
     >
-      <SyntaxViewer syntaxTree={syntaxTree} codeId={currentCodeId} loading={loading} error={error} />
+      <SyntaxViewer
+        syntaxTree={syntaxTree}
+        codeId={currentCodeId}
+        loading={loading}
+        error={error}
+      />
     </motion.div>
   );
 }
 
 export default SyntaxPage;
-

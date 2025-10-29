@@ -1,0 +1,18 @@
+# Fatorial iterativo
+func fatorial(n: number) -> number {
+    var res: number = 1;
+    var i: number = 2;
+
+    while (i <= n) {
+        res = res * i;
+        i = i + 1;
+    }
+
+    return res;
+}
+
+var n: number = 5;
+var f: number = fatorial(n);
+print("fatorial(", n, ") =", f);
+
+

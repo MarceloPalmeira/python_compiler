@@ -9,7 +9,7 @@ function Header() {
     { path: '/lexical', label: '🏷️ Análise Léxica' },
     { path: '/syntax', label: '🌳 Análise Sintática' },
     { path: '/cte', label: '⚙️ CTE -> Geração de Código Intermediário' },
-    { path: '/assembly', label: '💻 Assembly -> Geração de Código de Máquina' }
+    { path: '/assembly', label: '💻 Assembly -> Geração de Código de Máquina' },
   ];
 
   return (
@@ -40,7 +40,7 @@ function Header() {
 
           <div className="flex items-center gap-4">
             <motion.a
-              href="http://127.0.0.1:8000/docs"
+              href="http://localhost:8000/docs"
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
@@ -71,9 +71,10 @@ function Header() {
               className={({ isActive }) => `
                 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap
                 transition-all duration-200
-                ${isActive
-                  ? 'bg-apple-blue text-cyan-800 shadow-xl'
-                  : 'text-apple-gray-600 hover:bg-apple-gray-100'
+                ${
+                  isActive
+                    ? 'bg-apple-blue text-cyan-800 shadow-xl'
+                    : 'text-apple-gray-600 hover:bg-apple-gray-100'
                 }
               `}
             >
@@ -87,4 +88,3 @@ function Header() {
 }
 
 export default Header;
-

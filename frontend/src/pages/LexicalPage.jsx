@@ -22,14 +22,16 @@ function LexicalPage() {
     setSymbolsLoading(true);
     setSymbolsError(null);
 
-    compilerAPI.getTokens(currentCodeId)
+    compilerAPI
+      .getTokens(currentCodeId)
       .then(setTokens)
-      .catch(err => setTokensError(err.message))
+      .catch((err) => setTokensError(err.message))
       .finally(() => setTokensLoading(false));
 
-    compilerAPI.getSymbolsTable(currentCodeId)
+    compilerAPI
+      .getSymbolsTable(currentCodeId)
       .then(setSymbols)
-      .catch(err => setSymbolsError(err.message))
+      .catch((err) => setSymbolsError(err.message))
       .finally(() => setSymbolsLoading(false));
   }, [currentCodeId]);
 
@@ -59,12 +61,21 @@ function LexicalPage() {
       className="glass-morphism rounded-3xl apple-shadow-lg overflow-hidden p-6"
     >
       <div className="space-y-6">
-        <TokenViewer tokens={tokens} codeId={currentCodeId} loading={tokensLoading} error={tokensError} />
-        <SymbolTable symbols={symbols} codeId={currentCodeId} loading={symbolsLoading} error={symbolsError} />
+        <TokenViewer
+          tokens={tokens}
+          codeId={currentCodeId}
+          loading={tokensLoading}
+          error={tokensError}
+        />
+        <SymbolTable
+          symbols={symbols}
+          codeId={currentCodeId}
+          loading={symbolsLoading}
+          error={symbolsError}
+        />
       </div>
     </motion.div>
   );
 }
 
 export default LexicalPage;
-

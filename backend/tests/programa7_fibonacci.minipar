@@ -1,0 +1,23 @@
+# Fibonacci iterativo (fib(0)=0, fib(1)=1)
+func fib(n: number) -> number {
+    if (n <= 1) {
+        return n;
+    } else {
+        var a: number = 0;
+        var b: number = 1;
+        var i: number = 2;
+        while (i <= n) {
+            var t: number = a + b;
+            a = b;
+            b = t;
+            i = i + 1;
+        }
+        return b;
+    }
+}
+
+var k: number = 10;
+var fk: number = fib(k);
+print("fib(", k, ") =", fk);
+
+

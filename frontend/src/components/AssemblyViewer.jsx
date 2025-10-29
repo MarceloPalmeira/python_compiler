@@ -42,12 +42,12 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
     if (/^\w+\s*:/.test(trimmed)) {
       return { type: 'label', content: line };
     }
-    
+
     // Match directives (.text, .data, .global, etc)
     if (/^\.\w+/.test(trimmed)) {
       return { type: 'directive', content: line };
     }
-    
+
     // Match instructions (mov, add, sub, ldr, str, etc)
     if (/^\s*\w+\s+(r\d+|#|\[|sp|lr|pc)/i.test(trimmed)) {
       return { type: 'instruction', content: line };
@@ -66,7 +66,7 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
       >
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         >
           <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4" />
         </motion.div>
@@ -106,9 +106,7 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
         <h3 className="text-xl font-semibold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
           Erro ao Gerar Código Assembly
         </h3>
-        <p className="text-red-600 mb-4 font-medium">
-          {error}
-        </p>
+        <p className="text-red-600 mb-4 font-medium">{error}</p>
         <p className="text-sm text-apple-gray-600 bg-white/50 px-4 py-2 rounded-lg inline-block">
           Verifique se o código foi compilado corretamente
         </p>
@@ -142,10 +140,14 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
 
   const lines = asmCode.split('\n');
   const parsedLines = lines.map(parseAssemblyLine);
-  const instructionCount = parsedLines.filter(l => l.type === 'instruction').length;
-  const labelCount = parsedLines.filter(l => l.type === 'label').length;
-  const directiveCount = parsedLines.filter(l => l.type === 'directive').length;
-  const commentCount = parsedLines.filter(l => l.type === 'comment').length;
+  const instructionCount = parsedLines.filter(
+    (l) => l.type === 'instruction',
+  ).length;
+  const labelCount = parsedLines.filter((l) => l.type === 'label').length;
+  const directiveCount = parsedLines.filter(
+    (l) => l.type === 'directive',
+  ).length;
+  const commentCount = parsedLines.filter((l) => l.type === 'comment').length;
 
   return (
     <div className="space-y-6">
@@ -194,7 +196,7 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
               </>
             )}
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
@@ -219,28 +221,36 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
           <div className="flex items-center gap-2 mb-2">
             <FileCode className="w-5 h-5 text-blue-600" />
-            <span className="text-sm font-semibold text-blue-900">Instruções</span>
+            <span className="text-sm font-semibold text-blue-900">
+              Instruções
+            </span>
           </div>
           <p className="text-2xl font-bold text-blue-700">{instructionCount}</p>
         </div>
         <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
           <div className="flex items-center gap-2 mb-2">
             <Cpu className="w-5 h-5 text-purple-600" />
-            <span className="text-sm font-semibold text-purple-900">Diretivas</span>
+            <span className="text-sm font-semibold text-purple-900">
+              Diretivas
+            </span>
           </div>
           <p className="text-2xl font-bold text-purple-700">{directiveCount}</p>
         </div>
         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-200">
           <div className="flex items-center gap-2 mb-2">
             <FileCode className="w-5 h-5 text-emerald-600" />
-            <span className="text-sm font-semibold text-emerald-900">Rótulos</span>
+            <span className="text-sm font-semibold text-emerald-900">
+              Rótulos
+            </span>
           </div>
           <p className="text-2xl font-bold text-emerald-700">{labelCount}</p>
         </div>
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200">
           <div className="flex items-center gap-2 mb-2">
             <FileCode className="w-5 h-5 text-amber-600" />
-            <span className="text-sm font-semibold text-amber-900">Comentários</span>
+            <span className="text-sm font-semibold text-amber-900">
+              Comentários
+            </span>
           </div>
           <p className="text-2xl font-bold text-amber-700">{commentCount}</p>
         </div>
@@ -288,14 +298,15 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
                 </div>
               ))}
             </div>
-            
+
             {/* Código Assembly */}
             <div className="flex-1 overflow-x-auto">
               <div className="p-3">
                 {parsedLines.map((lineObj, index) => {
                   const { type, content } = lineObj;
-                  const baseClasses = 'py-1 px-4 font-mono text-sm leading-relaxed';
-                  
+                  const baseClasses =
+                    'py-1 px-4 font-mono text-sm leading-relaxed';
+
                   let lineElement;
                   switch (type) {
                     case 'comment':
@@ -307,14 +318,18 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
                       break;
                     case 'label':
                       lineElement = (
-                        <div className={`${baseClasses} text-emerald-700 font-semibold`}>
+                        <div
+                          className={`${baseClasses} text-emerald-700 font-semibold`}
+                        >
                           {content}
                         </div>
                       );
                       break;
                     case 'directive':
                       lineElement = (
-                        <div className={`${baseClasses} text-purple-700 font-medium`}>
+                        <div
+                          className={`${baseClasses} text-purple-700 font-medium`}
+                        >
                           {content}
                         </div>
                       );
@@ -364,26 +379,44 @@ function AssemblyViewer({ asmCode, codeId, loading, error }) {
           Sobre Assembly ARM
         </h3>
         <p className="text-sm text-indigo-800 leading-relaxed mb-3">
-          Assembly ARM é uma linguagem de baixo nível que representa instruções diretamente executáveis pelo processador ARM. 
-          O código gerado é compatível com o CPULator, um simulador online de arquitetura ARM, permitindo visualizar e testar 
-          a execução do programa em tempo real. Cada instrução corresponde diretamente a uma operação da CPU.
+          Assembly ARM é uma linguagem de baixo nível que representa instruções
+          diretamente executáveis pelo processador ARM. O código gerado é
+          compatível com o CPULator, um simulador online de arquitetura ARM,
+          permitindo visualizar e testar a execução do programa em tempo real.
+          Cada instrução corresponde diretamente a uma operação da CPU.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
           <div className="bg-white/60 rounded-lg p-3 border border-indigo-200">
-            <span className="text-xs font-semibold text-indigo-700">Instruções</span>
-            <p className="text-xs text-indigo-600 mt-1">Operações básicas do processador (mov, add, sub, ldr, str, etc)</p>
+            <span className="text-xs font-semibold text-indigo-700">
+              Instruções
+            </span>
+            <p className="text-xs text-indigo-600 mt-1">
+              Operações básicas do processador (mov, add, sub, ldr, str, etc)
+            </p>
           </div>
           <div className="bg-white/60 rounded-lg p-3 border border-indigo-200">
-            <span className="text-xs font-semibold text-indigo-700">Diretivas</span>
-            <p className="text-xs text-indigo-600 mt-1">Comandos do assembler (.text, .data, .global)</p>
+            <span className="text-xs font-semibold text-indigo-700">
+              Diretivas
+            </span>
+            <p className="text-xs text-indigo-600 mt-1">
+              Comandos do assembler (.text, .data, .global)
+            </p>
           </div>
           <div className="bg-white/60 rounded-lg p-3 border border-indigo-200">
-            <span className="text-xs font-semibold text-indigo-700">Rótulos</span>
-            <p className="text-xs text-indigo-600 mt-1">Marcadores de endereço para controle de fluxo</p>
+            <span className="text-xs font-semibold text-indigo-700">
+              Rótulos
+            </span>
+            <p className="text-xs text-indigo-600 mt-1">
+              Marcadores de endereço para controle de fluxo
+            </p>
           </div>
           <div className="bg-white/60 rounded-lg p-3 border border-indigo-200">
-            <span className="text-xs font-semibold text-indigo-700">Comentários</span>
-            <p className="text-xs text-indigo-600 mt-1">Anotações explicativas (iniciados com ; ou @)</p>
+            <span className="text-xs font-semibold text-indigo-700">
+              Comentários
+            </span>
+            <p className="text-xs text-indigo-600 mt-1">
+              Anotações explicativas (iniciados com ; ou @)
+            </p>
           </div>
         </div>
       </motion.div>
