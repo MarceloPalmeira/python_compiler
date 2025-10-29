@@ -1,0 +1,358 @@
+@startuml Diagrama_Classes_MiniPar_2025_1
+!theme plain
+title Diagrama de Classes - Compilador MiniPar 2025.1
+
+' ============ LAYER: AST NODES ============
+package "AST (Abstract Syntax Tree)" {
+    abstract class Node {
+        +type: str
+        +token: Token
+    }
+    
+    abstract class Statement {
+        +execute(): Any
+    }
+    
+    abstract class Expression {
+        +evaluate(): Any
+        +type: str
+    }
+    
+    class Program {
+        +stmts: List[Statement]
+        +execute(): None
+    }
+    
+    class Declaration {
+        +left: ID
+        +right: Expression
+        +execute(): None
+    }
+    
+    class Assign {
+        +left: Assignable  
+        +right: Expression
+        +execute(): None
+    }
+    
+    class FuncDef {
+        +name: str
+        +params: Parameters
+        +return_type: str
+        +body: Body
+        +execute(): None
+    }
+    
+    class If {
+        +condition: Expression
+        +body: Body
+        +else_stmt: Body
+        +execute(): None
+    }
+    
+    class While {
+        +condition: Expression
+        +body: Body
+        +execute(): None
+    }
+    
+    class For {
+        +iterator: Declaration
+        +iterable: Expression
+        +body: Body
+        +execute(): None
+    }
+    
+    class Par {
+        +body: Body
+        +execute(): None
+    }
+    
+    class Seq {
+        +body: Body
+        +execute(): None
+    }
+    
+    class CChannel {
+        +name: str
+        +host: Expression
+        +port: Expression
+        +execute(): None
+    }
+    
+    class SChannel {
+        +name: str
+        +host: Expression
+        +port: Expression
+        +func_name: str
+        +description: Expression
+        +execute(): None
+    }
+    
+    class Call {
+        +name: str
+        +args: List[Expression]
+        +oper: str
+        +evaluate(): Any
+    }
+    
+    class ID {
+        +name: str
+        +decl: bool
+        +evaluate(): Any
+    }
+    
+    class Constant {
+        +value: Any
+        +evaluate(): Any
+    }
+    
+    class Arithmetic {
+        +left: Expression
+        +right: Expression
+        +operator: str
+        +evaluate(): Any
+    }
+    
+    class Logical {
+        +left: Expression
+        +right: Expression
+        +operator: str
+        +evaluate(): Any
+    }
+}
+
+' ============ LAYER: COMPILER COMPONENTS ============
+package "Lexer Component" {
+    abstract class Lexer {
+        +scan(): NextToken
+    }
+    
+    class LexerImpl {
+        +source: str
+        +line: int
+        +token_labels: Dict[str, str]
+        +scan(): NextToken
+        -__init__(source: str)
+    }
+    
+    class Token {
+        +label: str
+        +value: str
+        +__init__(label: str, value: str)
+    }
+}
+
+package "Parser Component" {
+    abstract class Parser {
+        +match(label: str): bool
+        +start(): Program
+    }
+    
+    class ParserImpl {
+        +token_generator: NextToken
+        +lookahead: Token
+        +line: int
+        +symtable: SymTable
+        +start(): Program
+        +program(): Program
+        +stmt(): Statement
+        +expression(): Expression
+        +declaration(): Declaration
+        +func_def(): FuncDef
+        +block(): Body
+        -match(label: str): bool
+        -reference_id(): ID
+    }
+}
+
+package "Semantic Component" {
+    abstract class Semantic {
+        +visit(node: Node): Any
+        +generic_visit(node: Node): Any
+    }
+    
+    class SemanticImpl {
+        +context_stack: List[Node]
+        +function_table: Dict[str, FuncDef]
+        +visit(node: Node): Any
+        +visit_Declaration(node: Declaration): None
+        +visit_FuncDef(node: FuncDef): None
+        +visit_Call(node: Call): str
+        +visit_Par(node: Par): None
+        +visit_CChannel(node: CChannel): None
+        +visit_SChannel(node: SChannel): None
+        -check_types(left: str, right: str): bool
+    }
+}
+
+package "Symbol Management" {
+    class Symbol {
+        +name: str
+        +type: str
+        +__init__(name: str, type: str)
+    }
+    
+    class SymTable {
+        +prev: SymTable
+        +table: Dict[str, Symbol]
+        +insert(name: str, symbol: Symbol): bool
+        +find(name: str): Symbol
+        +__init__(prev: SymTable = None)
+    }
+    
+    class VarTable {
+        +prev: VarTable
+        +table: Dict[str, Any]
+        +find(name: str): VarTable
+        +__init__(prev: VarTable = None)
+    }
+}
+
+package "Runtime Component" {
+    abstract class Runner {
+        +run(node: Program): None
+        +execute(node: Node): Any
+        +enter_scope(): None
+        +exit_scope(): None
+    }
+    
+    class RunnerImpl {
+        +var_table: VarTable
+        +func_table: Dict[str, FuncDef]
+        +connection_table: Dict[str, socket]
+        +DEFAULT_FUNCTIONS: Dict[str, Callable]
+        +run(node: Program): None
+        +execute(node: Node): Any
+        +exec_Declaration(node: Declaration): None
+        +exec_Call(node: Call): Any
+        +exec_Par(node: Par): None
+        +exec_CChannel(node: CChannel): None
+        +exec_SChannel(node: SChannel): None
+        +send(conn_name: str, msg: str): str
+        +close(conn_name: str): None
+        +enter_scope(): None
+        +exit_scope(): None
+    }
+}
+
+package "Code Generation" {
+    class SimpleMiniparCompiler {
+        +tokenize(src: str): List[Dict]
+        +parse(src: str): Dict
+        +semantic_check(ast: Dict): Dict
+        +generate_tac(ast: Dict): List[str]
+        {static} +tac_to_arm(tac: List[str]): str
+    }
+    
+    class TACGenerator {
+        +temp_counter: int
+        +label_counter: int
+        +emit(instruction: str): None
+        +new_temp(): str
+        +expr_to_tac(expr: Dict): str
+        +gen_statement(node: Dict): None
+    }
+    
+    class ARMGenerator {
+        +reg_map: Dict[str, str]
+        +next_reg: int
+        +param_buffer: List[str]
+        +alloc_reg(name: str): str
+        +emit(line: str): None
+        +tac_to_arm(tac: List[str]): str
+    }
+}
+
+package "Interpreter Interface" {
+    abstract class Interpreter {
+        +run(source: str, input_data: str): str
+    }
+    
+    class Minipar {
+        +run(source: str, input_data: str): str
+        -redirect_stdin(new_stdin): Any
+    }
+}
+
+' ============ RELATIONSHIPS ============
+
+' Inheritance relationships
+Node <|-- Statement
+Node <|-- Expression
+Statement <|-- Program
+Statement <|-- Declaration
+Statement <|-- Assign
+Statement <|-- FuncDef
+Statement <|-- If
+Statement <|-- While
+Statement <|-- For
+Statement <|-- Par
+Statement <|-- Seq
+Statement <|-- CChannel
+Statement <|-- SChannel
+Expression <|-- Call
+Expression <|-- ID
+Expression <|-- Constant
+Expression <|-- Arithmetic
+Expression <|-- Logical
+
+Lexer <|-- LexerImpl
+Parser <|-- ParserImpl
+Semantic <|-- SemanticImpl
+Runner <|-- RunnerImpl
+Interpreter <|-- Minipar
+
+' Composition relationships
+ParserImpl *-- SymTable : uses
+ParserImpl *-- Token : processes
+SemanticImpl *-- FuncDef : validates
+RunnerImpl *-- VarTable : manages
+RunnerImpl *-- FuncDef : executes
+Minipar *-- LexerImpl : uses
+Minipar *-- ParserImpl : uses
+Minipar *-- SemanticImpl : uses
+Minipar *-- RunnerImpl : uses
+
+' Aggregation relationships
+SymTable o-- Symbol : contains
+VarTable o-- Any : stores
+Program o-- Statement : contains
+FuncDef o-- Statement : contains
+
+' Dependency relationships
+ParserImpl ..> Program : creates
+ParserImpl ..> Declaration : creates
+ParserImpl ..> FuncDef : creates
+SemanticImpl ..> Symbol : accesses
+RunnerImpl ..> Par : executes_parallel
+RunnerImpl ..> CChannel : creates_socket
+SimpleMiniparCompiler ..> TACGenerator : uses
+SimpleMiniparCompiler ..> ARMGenerator : uses
+
+' Notes
+note right of ParserImpl
+  Implementa análise sintática
+  descendente recursiva.
+  Gera AST e popula tabela
+  de símbolos simultaneamente.
+end note
+
+note right of SemanticImpl
+  Implementa padrão Visitor
+  para análise semântica.
+  Verifica tipos e escopo.
+end note
+
+note right of RunnerImpl
+  Executa código MiniPar
+  interpretado. Suporta
+  threads e sockets.
+end note
+
+note right of SimpleMiniparCompiler
+  Compilador funcional
+  completo: fonte → TAC → ARM
+end note
+
+@enduml

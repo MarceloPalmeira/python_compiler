@@ -1,0 +1,145 @@
+@startuml Arquitetura_Componentes_MiniPar_2025_1
+!theme plain
+title Arquitetura de Componentes de Software - Compilador MiniPar 2025.1
+
+' Definição dos componentes principais
+package "Frontend Layer" {
+    [Web Editor] as WebEditor
+    [CLI Interface] as CLI
+    [REST API] as API
+}
+
+package "Compiler Core" {
+    [Lexer Component] as Lexer
+    [Parser Component] as Parser  
+    [Semantic Analyzer] as Semantic
+    [Symbol Table Manager] as SymTable
+    [TAC Generator] as TACGen
+    [ARM Generator] as ARMGen
+}
+
+package "Runtime Layer" {
+    [Interpreter] as Interpreter
+    [Thread Manager] as ThreadMgr
+    [Socket Manager] as SocketMgr
+    [Memory Manager] as MemMgr
+}
+
+package "Support Components" {
+    [AST Builder] as AST
+    [Error Handler] as ErrorHandler
+    [Utils Library] as Utils
+    [File Manager] as FileMgr
+}
+
+package "External Systems" {
+    [CPULator] as CPULator
+    [ANTLR Runtime] as ANTLR
+    [Python Threading] as Threading
+    [Socket Library] as Sockets
+}
+
+' Interfaces principais
+interface "ILexer" as ILexer
+interface "IParser" as IParser  
+interface "ISemantic" as ISemantic
+interface "IRunner" as IRunner
+interface "ISymbolTable" as ISymTable
+
+' Conexões entre componentes
+WebEditor --> API : HTTP Request
+CLI --> Lexer : Direct Call
+API --> Lexer : Process Code
+
+Lexer ..|> ILexer
+Parser ..|> IParser
+Semantic ..|> ISemantic
+Interpreter ..|> IRunner
+SymTable ..|> ISymTable
+
+' Pipeline principal do compilador
+Lexer --> Parser : Token Stream
+Parser --> AST : Generates
+Parser --> SymTable : Updates
+AST --> Semantic : Validates
+Semantic --> SymTable : Checks
+Semantic --> TACGen : Valid AST
+TACGen --> ARMGen : TAC Code
+ARMGen --> CPULator : ARM Assembly
+
+' Runtime components
+Interpreter --> ThreadMgr : PAR blocks
+Interpreter --> SocketMgr : Channels
+Interpreter --> MemMgr : Variables
+ThreadMgr --> Threading : Uses
+SocketMgr --> Sockets : Uses
+
+' Support connections
+Parser --> ErrorHandler : Errors
+Semantic --> ErrorHandler : Validation Errors
+Lexer --> Utils : String Processing
+Parser --> Utils : Token Processing
+FileMgr --> Utils : File Operations
+
+' External dependencies
+Lexer --> ANTLR : Grammar Processing
+Parser --> ANTLR : Grammar Processing
+
+' Notas explicativas
+note right of Lexer
+  **Analisador Léxico**
+  - Tokenização do código MiniPar
+  - Reconhece palavras-chave
+  - Filtra comentários
+  - Implementa regex patterns
+end note
+
+note right of Parser
+  **Analisador Sintático**
+  - Gera AST a partir de tokens
+  - Implementa gramática MiniPar
+  - Verifica sintaxe
+  - Gerencia tabela de símbolos
+end note
+
+note right of Semantic
+  **Analisador Semântico**
+  - Verificação de tipos
+  - Validação de escopo
+  - Análise de fluxo de controle
+  - Detecção de erros semânticos
+end note
+
+note right of TACGen
+  **Gerador TAC**
+  - Código de três endereços
+  - Otimizações básicas
+  - Preparação para ARM
+  - Formato textual
+end note
+
+note right of ARMGen
+  **Gerador Assembly ARM**
+  - Assembly ARMv7
+  - Compatível com CPULator
+  - Mapeamento de registradores
+  - System calls
+end note
+
+note right of ThreadMgr
+  **Gerenciador de Threads**
+  - Execução paralela (PAR)
+  - Multiprocessing.Pool
+  - Sincronização
+  - Isolamento de contexto
+end note
+
+note right of SocketMgr
+  **Gerenciador de Sockets**
+  - Canais c_channel/s_channel
+  - Comunicação TCP/IP
+  - Cliente/Servidor
+  - Threading para múltiplas conexões
+end note
+
+@enduml

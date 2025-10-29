@@ -1,0 +1,112 @@
+@startuml Casos_de_Uso_MiniPar_2025_1
+!theme plain
+title Diagrama de Casos de Uso - Compilador MiniPar 2025.1
+
+' Atores
+actor "Desenvolvedor" as dev
+actor "Usuário Final" as user
+actor "Sistema Externo" as external
+actor "CPULator" as cpu
+
+' Pacotes de casos de uso
+package "Compilador MiniPar" {
+    ' Casos de uso principais
+    usecase "Escrever Código MiniPar" as UC01
+    usecase "Compilar Código" as UC02
+    usecase "Análise Léxica" as UC03
+    usecase "Análise Sintática" as UC04
+    usecase "Análise Semântica" as UC05
+    usecase "Gerar TAC" as UC06
+    usecase "Gerar Assembly ARM" as UC07
+    usecase "Executar no CPULator" as UC08
+    
+    ' Casos de uso de funcionalidades específicas
+    usecase "Processar PAR/SEQ" as UC09
+    usecase "Gerenciar Canais" as UC10
+    usecase "Executar Threads" as UC11
+    usecase "Comunicação Socket" as UC12
+    
+    ' Casos de uso de interface
+    usecase "Usar Interface Web" as UC13
+    usecase "Usar API REST" as UC14
+    usecase "Usar CLI" as UC15
+    
+    ' Casos de uso de validação
+    usecase "Validar Sintaxe" as UC16
+    usecase "Gerenciar Símbolos" as UC17
+    usecase "Tratar Erros" as UC18
+}
+
+package "Programas de Teste" {
+    usecase "Calcular Fatorial" as UC19
+    usecase "Série Fibonacci" as UC20
+    usecase "Quicksort" as UC21
+    usecase "Neurônio Simples" as UC22
+    usecase "Rede Neural XOR" as UC23
+    usecase "Sistema Recomendação" as UC24
+    usecase "Cliente-Servidor" as UC25
+    usecase "Execução Paralela" as UC26
+}
+
+' Relacionamentos dos atores
+dev --> UC01 : escreve
+dev --> UC02 : solicita compilação
+dev --> UC13 : utiliza
+dev --> UC14 : consome API
+dev --> UC15 : executa comandos
+
+user --> UC08 : executa
+user --> UC19 : testa
+user --> UC20 : testa
+user --> UC21 : testa
+user --> UC22 : testa
+user --> UC23 : testa
+user --> UC24 : testa
+
+external --> UC25 : conecta
+external --> UC12 : comunica
+
+cpu --> UC08 : executa assembly
+
+' Relacionamentos include/extend
+UC02 ..> UC03 : <<include>>
+UC02 ..> UC04 : <<include>>
+UC02 ..> UC05 : <<include>>
+UC02 ..> UC06 : <<include>>
+UC02 ..> UC07 : <<include>>
+
+UC04 ..> UC16 : <<include>>
+UC05 ..> UC17 : <<include>>
+UC02 ..> UC18 : <<extend>>
+
+UC09 ..> UC11 : <<include>>
+UC10 ..> UC12 : <<include>>
+
+UC25 ..> UC10 : <<include>>
+UC26 ..> UC09 : <<include>>
+
+' Relacionamentos de generalização
+UC19 --|> UC02
+UC20 --|> UC02
+UC21 --|> UC02
+UC22 --|> UC02
+UC23 --|> UC02
+UC24 --|> UC02
+
+note right of UC02
+  Pipeline principal do compilador:
+  Código MiniPar → Tokens → AST → 
+  TAC → Assembly ARM
+end note
+
+note right of UC09
+  Execução paralela usando
+  threads e multiprocessing
+end note
+
+note right of UC10
+  Comunicação entre processos
+  usando sockets TCP/IP
+end note
+
+@enduml
