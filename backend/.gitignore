@@ -162,9 +162,6 @@ cython_debug/
 cache/
 *.json
 
-# ANTLR generated files (optional - you might want to regenerate these)
-compiler/generated/
-
 # MiniPar reference implementation (local only)
 minipar/
 

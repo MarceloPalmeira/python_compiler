@@ -14,11 +14,6 @@ Complete standalone MiniPar compiler with:
 ### `tac_to_arm.py` - **ARM Assembly Generator**
 Functional TAC->ARM translator that converts TAC to ARM assembly.
 
-### Deprecated/Legacy Files
-- `tac_generator.py` - Now delegates to `simple_minipar_compiler.generate_tac()`
-- `tac_to_arm_fixed.py` - Deprecated, raises ImportError
-- `tac_to_arm_fn.py` - Deprecated, raises ImportError
-
 ## Compiler Pipeline
 
 ```

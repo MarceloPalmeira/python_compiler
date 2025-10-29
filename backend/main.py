@@ -34,9 +34,8 @@ def compiler(input_file, output_file, show_tree):
         compiler_cmd.run(input_file, output_file, show_tree)
     except ImportError as e:
         print(f"Error: {e}")
-        print("Please make sure to generate ANTLR files first by running:")
-        print("  ./generate_antlr.sh (Linux/Mac)")
-        print("  generate_antlr.bat (Windows)")
+        print("Please make sure the compiler module is properly installed.")
+        print("Try running: pip install -r requirements.txt")
         sys.exit(1)
 
 

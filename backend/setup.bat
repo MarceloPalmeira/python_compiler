@@ -33,10 +33,6 @@ REM Install requirements
 echo Installing Python dependencies...
 pip install -r requirements.txt
 
-REM Generate ANTLR files (optional - using SimpleMiniparCompiler as primary)
-echo Generating ANTLR files (optional)...
-call generate_antlr.bat
-
 echo.
 echo ===============================================
 echo MiniPar Compiler Setup completed successfully!

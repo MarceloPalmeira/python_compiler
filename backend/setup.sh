@@ -31,15 +31,6 @@ pip install --upgrade pip
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Install ANTLR4 tools
-echo "Installing ANTLR4 tools..."
-pip install antlr4-tools
-
-# Generate ANTLR files
-echo "Generating ANTLR Python files..."
-chmod +x generate_antlr.sh
-./generate_antlr.sh
-
 echo ""
 echo "====================================="
 echo "Setup completed successfully!"

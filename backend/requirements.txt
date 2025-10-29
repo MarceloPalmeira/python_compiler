@@ -8,10 +8,6 @@ python-multipart==0.0.12
 click==8.1.7
 typing-extensions>=4.12.2
 
-# ANTLR4 Support (Optional - para parsing avançado)
-antlr4-python3-runtime==4.13.0
-antlr4-tools==0.2.1
-
 # Data Processing
 dataclasses-json==0.6.2
 requests==2.31.0

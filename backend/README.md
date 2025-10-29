@@ -8,7 +8,7 @@ Este projeto implementa um **compilador completo** para a linguagem **MiniPar 20
 - **Código Intermediário** - TAC (Three-Address Code, textual IR)
 - **Assembly ARM** - Compatível com CPULator (https://cpulator.01xz.net/?sys=arm)
 
-> **Implementação Principal**: O projeto usa `simple_minipar_compiler.py` - um compilador funcional standalone que não depende de ANTLR. As gramáticas ANTLR estão disponíveis para referência e uso avançado.
+> **Implementação Principal**: O projeto usa `simple_minipar_compiler.py` - um compilador funcional standalone. As gramáticas ANTLR estão disponíveis para referência académica.
 
 ## Setup
 
@@ -36,8 +36,9 @@ python_compiler/
 │   ├── LexerGrammarMinipar.g4  # Lexer MiniPar oficial
 │   └── ParserGrammarMinipar.g4 # Parser MiniPar oficial
 ├── compiler/                # Módulo do compilador
-│   ├── generated/          # Arquivos ANTLR originais
-│   ├── generated_minipar/  # Arquivos ANTLR MiniPar
+│   ├── simple_minipar_compiler.py  # ⭐ COMPILADOR PRINCIPAL
+│   ├── tac_to_arm.py       # Tradutor TAC → ARM
+│   ├── compiler_command.py # Comando CLI
 │   ├── simple_minipar_compiler.py  # Compilador standalone (funcional)
 │   └── compiler_command.py # Comando CLI
 ├── api/                    # API REST completa
@@ -83,17 +84,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-5. **Gere os arquivos ANTLR:**
+5. **Teste a instalação:**
 
-Windows:
-```batch
-generate_antlr.bat
-```
-
-Linux/Mac:
 ```bash
-chmod +x generate_antlr.sh
-./generate_antlr.sh
+python -c "from compiler.simple_minipar_compiler import tokenize, parse; print('✅ Compilador OK')"
 ```
 
 ## Uso
@@ -354,13 +348,6 @@ Entrega/
 ```
 
 ## Solução de Problemas
-
-### Erro "ANTLR files not found"
-Execute o script de geração:
-```bash
-./generate_antlr.sh  # Linux/Mac
-generate_antlr.bat   # Windows
-```
 
 ### Erro de importação de módulos
 Certifique-se de que o ambiente virtual está ativo:

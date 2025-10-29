@@ -13,7 +13,6 @@ project_root = PathLib(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from services.compiler_service import compiler_service
-from api.compiler.models import OptLevel
 
 router = APIRouter()
 
