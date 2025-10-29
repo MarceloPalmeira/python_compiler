@@ -1,0 +1,153 @@
+# Quicksort iterativo sobre 5 elementos (a, b, c, d, e)
+# Observacao: a gramatica nao possui listas/indices; simulamos um vetor com get/set em variaveis globais
+var a: number = 7;
+var b: number = 3;
+var c: number = 9;
+var d: number = 1;
+var e: number = 5;
+
+# "Vetor" de 5 posicoes [0..4] acessado por get/set
+func get(i: number) -> number {
+    if (i == 0) { return a; } else {
+        if (i == 1) { return b; } else {
+            if (i == 2) { return c; } else {
+                if (i == 3) { return d; } else {
+                    return e;
+                }
+            }
+        }
+    }
+}
+
+func set(i: number, v: number) -> number {
+    if (i == 0) { a = v; } else {
+        if (i == 1) { b = v; } else {
+            if (i == 2) { c = v; } else {
+                if (i == 3) { d = v; } else {
+                    e = v;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+func swap(i: number, j: number) -> number {
+    var ti: number = get(i);
+    var tj: number = get(j);
+    set(i, tj);
+    set(j, ti);
+    return 0;
+}
+
+# Pilha manual para intervalos [l, r] (capacidade 8 frames)
+var top: number = -1;
+var sL0: number = 0; var sR0: number = 0;
+var sL1: number = 0; var sR1: number = 0;
+var sL2: number = 0; var sR2: number = 0;
+var sL3: number = 0; var sR3: number = 0;
+var sL4: number = 0; var sR4: number = 0;
+var sL5: number = 0; var sR5: number = 0;
+var sL6: number = 0; var sR6: number = 0;
+var sL7: number = 0; var sR7: number = 0;
+
+var curL: number = 0;
+var curR: number = 0;
+
+func push(l: number, r: number) -> number {
+    top = top + 1;
+    if (top == 0) { sL0 = l; sR0 = r; } else {
+        if (top == 1) { sL1 = l; sR1 = r; } else {
+            if (top == 2) { sL2 = l; sR2 = r; } else {
+                if (top == 3) { sL3 = l; sR3 = r; } else {
+                    if (top == 4) { sL4 = l; sR4 = r; } else {
+                        if (top == 5) { sL5 = l; sR5 = r; } else {
+                            if (top == 6) { sL6 = l; sR6 = r; } else {
+                                sL7 = l; sR7 = r;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+func pop() -> number {
+    if (top == 0) { curL = sL0; curR = sR0; } else {
+        if (top == 1) { curL = sL1; curR = sR1; } else {
+            if (top == 2) { curL = sL2; curR = sR2; } else {
+                if (top == 3) { curL = sL3; curR = sR3; } else {
+                    if (top == 4) { curL = sL4; curR = sR4; } else {
+                        if (top == 5) { curL = sL5; curR = sR5; } else {
+                            if (top == 6) { curL = sL6; curR = sR6; } else {
+                                curL = sL7; curR = sR7;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    top = top - 1;
+    return 0;
+}
+
+func particao(l: number, r: number) -> number {
+    var i: number = l;
+    var j: number = r;
+    var pivot: number = get(l);
+
+    while (i <= j) {
+        while (get(i) < pivot) { i = i + 1; }
+        while (get(j) > pivot) { j = j - 1; }
+        if (i <= j) {
+            swap(i, j);
+            i = i + 1;
+            j = j - 1;
+        } else {
+            i = i + 0;
+        }
+    }
+
+    return i;
+}
+
+func quicksort_iterativo() -> number {
+    push(0, 4);
+
+    while (top >= 0) {
+        pop();
+        var l: number = curL;
+        var r: number = curR;
+
+        if (l < r) {
+            var p: number = particao(l, r);
+            var i: number = p;
+            var j: number = p - 1;
+
+            if (l < j) {
+                push(l, j);
+            } else {
+                p = p + 0;
+            }
+
+            if (i < r) {
+                push(i, r);
+            } else {
+                p = p + 0;
+            }
+        } else {
+            l = l + 0;
+        }
+    }
+
+    return 0;
+}
+
+print("Antes:", a, b, c, d, e);
+quicksort_iterativo();
+print("Depois:", a, b, c, d, e);
+
+

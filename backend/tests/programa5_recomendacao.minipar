@@ -1,0 +1,47 @@
+# Sistema de recomendação baseado em idade e preferências
+var idade: number = 22;
+var gostaAcao: bool = true;
+var gostaRomance: bool = false;
+
+func recomendar(idade: number, gostaAcao: bool, gostaRomance: bool) -> number {
+    var scoreAcao: number = 0;
+    var scoreRomance: number = 0;
+
+    if (gostaAcao) {
+        scoreAcao = scoreAcao + 2;
+    } else {
+        scoreAcao = scoreAcao + 0;
+    }
+
+    if (gostaRomance) {
+        scoreRomance = scoreRomance + 2;
+    } else {
+        scoreRomance = scoreRomance + 0;
+    }
+
+    if (idade < 14) {
+        scoreRomance = scoreRomance + 1;
+    } else {
+        if (idade >= 18) {
+            scoreAcao = scoreAcao + 1;
+        } else {
+            scoreAcao = scoreAcao + 0;
+        }
+    }
+
+    if (scoreAcao > scoreRomance) {
+        print("Recomendacao:", "Acao");
+    } else {
+        if (scoreRomance > scoreAcao) {
+            print("Recomendacao:", "Romance");
+        } else {
+            print("Recomendacao:", "Qualquer");
+        }
+    }
+
+    return 0;
+}
+
+recomendar(idade, gostaAcao, gostaRomance);
+
+
