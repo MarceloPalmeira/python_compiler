@@ -1,6 +1,13 @@
 import unittest
-from backend.compiler import simple_minipar_compiler as comp
-from backend.services.compiler_service import CompilerService
+import sys
+from pathlib import Path
+
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from compiler import simple_minipar_compiler as comp
+from services.compiler_service import CompilerService
 
 
 class TestSimpleMiniParCompiler(unittest.TestCase):

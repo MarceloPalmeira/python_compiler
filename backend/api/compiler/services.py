@@ -8,7 +8,6 @@ import os
 import json
 from pathlib import Path
 from typing import Optional, Dict
-import subprocess
 import sys
 import importlib.util
 
@@ -133,22 +132,6 @@ class TACCompilerService:
         except Exception as e:
             raise Exception(f"TAC generation failed: {e}")
 
-    def get_opt_tac_code(self, code_id: str, opt_level) -> Optional[str]:
-        cache_key = f"{code_id}_tac_opt_{opt_level.value}"
-        if cache_key in self._tac_cache:
-            return self._tac_cache[cache_key]
-
-        base = self.get_tac_code(code_id)
-        if base is None:
-            return None
-
-        try:
-            optimized = f"; Optimization level {opt_level.value}\n{base}"
-            self._tac_cache[cache_key] = optimized
-            return optimized
-        except Exception as e:
-            raise Exception(f"TAC optimization failed: {e}")
-
     def get_asm_code(self, code_id: str) -> Optional[str]:
         """Generate ARM assembly (CPULator) from TAC via tac_to_arm translator."""
         cache_key = f"{code_id}_asm"
@@ -179,22 +162,6 @@ class TACCompilerService:
         except Exception as e:
             raise Exception(f"Assembly generation failed: {e}")
 
-    def get_opt_asm_code(self, code_id: str, opt_level) -> Optional[str]:
-        cache_key = f"{code_id}_asm_opt_{opt_level.value}"
-        if cache_key in self._tac_cache:
-            return self._tac_cache[cache_key]
-
-        try:
-            base_asm = self.get_asm_code(code_id)
-            if base_asm is None:
-                return None
-
-            optimized_asm = f"; Optimized assembly with {opt_level.value}\n{base_asm}"
-            self._tac_cache[cache_key] = optimized_asm
-            return optimized_asm
-        except Exception as e:
-            raise Exception(f"Optimized assembly generation failed: {e}")
-
 
 class SyntaxTreeService:
     """Syntax tree service"""
@@ -213,8 +180,21 @@ class SyntaxTreeService:
             return None
         
         try:
-            # Placeholder implementation
-            syntax_tree = f"Syntax tree for code ID: {code_id}\n(Implementation pending - requires ANTLR parser)"
+            # Use simple_minipar_compiler for syntax tree
+            code = self.code_cache_manager.load_code_from_id(code_id)
+            if code is None:
+                return None
+            
+            # Import simple_minipar_compiler
+            import sys
+            from pathlib import Path
+            project_root = Path(__file__).parent.parent.parent
+            sys.path.insert(0, str(project_root))
+            
+            from compiler.simple_minipar_compiler import parse
+            ast = parse(code)
+            
+            syntax_tree = f"Syntax tree for code ID: {code_id}\n{str(ast)}"
             
             self._cache[code_id] = syntax_tree
             return syntax_tree
@@ -239,8 +219,21 @@ class TokenListService:
             return None
         
         try:
-            # Placeholder implementation
-            token_list = f"Token list for code ID: {code_id}\n(Implementation pending - requires ANTLR lexer)"
+            # Use simple_minipar_compiler for tokenization
+            code = self.code_cache_manager.load_code_from_id(code_id)
+            if code is None:
+                return None
+            
+            # Import simple_minipar_compiler
+            import sys
+            from pathlib import Path
+            project_root = Path(__file__).parent.parent.parent
+            sys.path.insert(0, str(project_root))
+            
+            from compiler.simple_minipar_compiler import tokenize
+            tokens = tokenize(code)
+            
+            token_list = f"Token list for code ID: {code_id}\n{str(tokens)}"
             
             self._cache[code_id] = token_list
             return token_list
@@ -265,8 +258,22 @@ class SymbolsTableService:
             return None
         
         try:
-            # Placeholder implementation
-            symbols_table = f"Symbols table for code ID: {code_id}\n(Implementation pending - requires semantic analysis)"
+            # Use simple_minipar_compiler for symbols table
+            code = self.code_cache_manager.load_code_from_id(code_id)
+            if code is None:
+                return None
+            
+            # Import simple_minipar_compiler
+            import sys
+            from pathlib import Path
+            project_root = Path(__file__).parent.parent.parent
+            sys.path.insert(0, str(project_root))
+            
+            from compiler.simple_minipar_compiler import parse, semantic_check
+            ast = parse(code)
+            semantic_result = semantic_check(ast)
+            
+            symbols_table = f"Symbols table for code ID: {code_id}\n{str(semantic_result.get('symbols', {}))}"
             
             self._cache[code_id] = symbols_table
             return symbols_table
