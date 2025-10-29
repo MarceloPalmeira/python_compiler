@@ -24,7 +24,7 @@ class CompilerAPI {
     } catch (error) {
       console.error('Erro ao fazer upload do código:', error);
       throw new Error(
-        error.response?.data?.detail || 'Erro ao fazer upload do código'
+        error.response?.data?.detail || 'Erro ao fazer upload do código',
       );
     }
   }
@@ -40,9 +40,7 @@ class CompilerAPI {
       return response.data.code;
     } catch (error) {
       console.error('Erro ao obter código:', error);
-      throw new Error(
-        error.response?.data?.detail || 'Erro ao obter código'
-      );
+      throw new Error(error.response?.data?.detail || 'Erro ao obter código');
     }
   }
 
@@ -58,13 +56,14 @@ class CompilerAPI {
         transformResponse: [(data) => data],
       });
 
-      const raw = typeof response.data === 'string' ? response.data : String(response.data || '');
+      const raw =
+        typeof response.data === 'string'
+          ? response.data
+          : String(response.data || '');
       return parseTokensTextToArray(raw);
     } catch (error) {
       console.error('Erro ao obter tokens:', error);
-      throw new Error(
-        error.response?.data?.detail || 'Erro ao obter tokens'
-      );
+      throw new Error(error.response?.data?.detail || 'Erro ao obter tokens');
     }
   }
 
@@ -88,7 +87,7 @@ class CompilerAPI {
     } catch (error) {
       console.error('Erro ao obter árvore sintática:', error);
       throw new Error(
-        error.response?.data?.detail || 'Erro ao obter árvore sintática'
+        error.response?.data?.detail || 'Erro ao obter árvore sintática',
       );
     }
   }
@@ -104,9 +103,7 @@ class CompilerAPI {
       return response.data.llvm_ir;
     } catch (error) {
       console.error('Erro ao obter LLVM IR:', error);
-      throw new Error(
-        error.response?.data?.detail || 'Erro ao obter LLVM IR'
-      );
+      throw new Error(error.response?.data?.detail || 'Erro ao obter LLVM IR');
     }
   }
 
@@ -122,12 +119,15 @@ class CompilerAPI {
         transformResponse: [(data) => data],
       });
 
-      const raw = typeof response.data === 'string' ? response.data : String(response.data || '');
+      const raw =
+        typeof response.data === 'string'
+          ? response.data
+          : String(response.data || '');
       return parseSymbolsTextToObject(raw);
     } catch (error) {
       console.error('Erro ao obter tabela de símbolos:', error);
       throw new Error(
-        error.response?.data?.detail || 'Erro ao obter tabela de símbolos'
+        error.response?.data?.detail || 'Erro ao obter tabela de símbolos',
       );
     }
   }
@@ -144,7 +144,7 @@ class CompilerAPI {
     } catch (error) {
       console.error('Erro ao obter análise de complexidade:', error);
       throw new Error(
-        error.response?.data?.detail || 'Erro ao obter análise de complexidade'
+        error.response?.data?.detail || 'Erro ao obter análise de complexidade',
       );
     }
   }
@@ -169,7 +169,7 @@ class CompilerAPI {
     } catch (error) {
       console.error('Erro ao obter código TAC:', error);
       throw new Error(
-        error.response?.data?.detail || 'Erro ao obter código TAC'
+        error.response?.data?.detail || 'Erro ao obter código TAC',
       );
     }
   }
@@ -194,7 +194,7 @@ class CompilerAPI {
     } catch (error) {
       console.error('Erro ao obter código Assembly:', error);
       throw new Error(
-        error.response?.data?.detail || 'Erro ao obter código Assembly'
+        error.response?.data?.detail || 'Erro ao obter código Assembly',
       );
     }
   }
@@ -208,11 +208,17 @@ function normalizePythonish(input) {
   if (!input || typeof input !== 'string') return '';
   let s = input.trim();
   // Remove leading/trailing quotes if the whole payload was quoted
-  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'"))
+  ) {
     s = s.slice(1, -1);
   }
   // Normalize booleans and nulls
-  s = s.replace(/\bTrue\b/g, 'true').replace(/\bFalse\b/g, 'false').replace(/\bNone\b/g, 'null');
+  s = s
+    .replace(/\bTrue\b/g, 'true')
+    .replace(/\bFalse\b/g, 'false')
+    .replace(/\bNone\b/g, 'null');
   // Convert set() to []
   s = s.replace(/set\(\)/g, '[]');
   // Convert single-quoted strings to JSON strings
@@ -226,7 +232,7 @@ function normalizePythonish(input) {
 function safeEvalToObject(expr) {
   try {
     // eslint-disable-next-line no-new-func
-    const fn = Function; 
+    const fn = Function;
     return fn(`"use strict"; return (${expr});`)();
   } catch (_e) {
     return null;
@@ -292,7 +298,9 @@ function coerceSymbols(obj) {
     ? obj.variables
     : Array.isArray(obj?.symbols?.variables)
       ? obj.symbols.variables
-      : (obj.variables && typeof obj.variables === 'object' && !('0' in obj.variables))
+      : obj.variables &&
+          typeof obj.variables === 'object' &&
+          !('0' in obj.variables)
         ? Object.values(obj.variables)
         : [];
 
@@ -315,4 +323,3 @@ function coerceSymbols(obj) {
     functionNames,
   };
 }
-

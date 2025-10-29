@@ -48,6 +48,7 @@ O frontend segue as diretrizes de design da Apple:
 O frontend se conecta ao backend FastAPI em `http://127.0.0.1:8000`
 
 Endpoints utilizados:
+
 - `POST /compiler/upload` - Upload de código
 - `GET /compiler/{code_id}/token` - Obter tokens
 - `GET /compiler/{code_id}/syntax` - Obter árvore sintática
@@ -79,4 +80,3 @@ func somar(a: number, b: number) -> number {
 ## 📄 Licença
 
 MIT
-

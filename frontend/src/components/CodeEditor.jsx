@@ -6,7 +6,8 @@ import { useCodeContext } from '../contexts/CodeContext';
 import compilerAPI from '../services/api';
 
 function CodeEditor({ code, setCode }) {
-  const { currentCodeId, updateCurrentCodeId, hasCodeLoaded } = useCodeContext();
+  const { currentCodeId, updateCurrentCodeId, hasCodeLoaded } =
+    useCodeContext();
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(null); // 'success' | 'error' | null
   const [uploadMessage, setUploadMessage] = useState('');
@@ -27,7 +28,7 @@ function CodeEditor({ code, setCode }) {
       updateCurrentCodeId(codeId);
       setUploadStatus('success');
       setUploadMessage(`Código enviado! ID: ${codeId.substring(0, 8)}...`);
-      
+
       // Limpa a mensagem após 5 segundos
       setTimeout(() => setUploadStatus(null), 5000);
     } catch (error) {
@@ -95,9 +96,10 @@ function CodeEditor({ code, setCode }) {
           className={`
             flex items-center gap-2 px-8 py-3 rounded-xl font-medium
             transition-all duration-200 apple-shadow
-            ${uploading || !code.trim()
-              ? 'bg-apple-gray-200 text-apple-gray-400 cursor-not-allowed'
-              : 'bg-purple-500 text-white hover:bg-purple-600'
+            ${
+              uploading || !code.trim()
+                ? 'bg-apple-gray-200 text-apple-gray-400 cursor-not-allowed'
+                : 'bg-purple-500 text-white hover:bg-purple-600'
             }
           `}
         >
@@ -124,9 +126,10 @@ function CodeEditor({ code, setCode }) {
             exit={{ opacity: 0, y: -10 }}
             className={`
               flex items-center gap-2 px-4 py-3 rounded-xl border
-              ${uploadStatus === 'success' 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
+              ${
+                uploadStatus === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
               }
             `}
           >
@@ -150,10 +153,30 @@ function CodeEditor({ code, setCode }) {
           💡 Dicas de Sintaxe MiniPar
         </h3>
         <ul className="text-sm text-apple-gray-600 space-y-1">
-          <li>• Declarações: <code className="bg-white px-2 py-0.5 rounded">var nome: tipo = valor</code></li>
-          <li>• Tipos: <code className="bg-white px-2 py-0.5 rounded">number</code>, <code className="bg-white px-2 py-0.5 rounded">bool</code>, <code className="bg-white px-2 py-0.5 rounded">string</code></li>
-          <li>• Funções: <code className="bg-white px-2 py-0.5 rounded">func nome(param: tipo) -&gt; tipo &#123; ... &#125;</code></li>
-          <li>• Estruturas: <code className="bg-white px-2 py-0.5 rounded">if/else</code>, <code className="bg-white px-2 py-0.5 rounded">while</code>, <code className="bg-white px-2 py-0.5 rounded">for</code></li>
+          <li>
+            • Declarações:{' '}
+            <code className="bg-white px-2 py-0.5 rounded">
+              var nome: tipo = valor
+            </code>
+          </li>
+          <li>
+            • Tipos:{' '}
+            <code className="bg-white px-2 py-0.5 rounded">number</code>,{' '}
+            <code className="bg-white px-2 py-0.5 rounded">bool</code>,{' '}
+            <code className="bg-white px-2 py-0.5 rounded">string</code>
+          </li>
+          <li>
+            • Funções:{' '}
+            <code className="bg-white px-2 py-0.5 rounded">
+              func nome(param: tipo) -&gt; tipo &#123; ... &#125;
+            </code>
+          </li>
+          <li>
+            • Estruturas:{' '}
+            <code className="bg-white px-2 py-0.5 rounded">if/else</code>,{' '}
+            <code className="bg-white px-2 py-0.5 rounded">while</code>,{' '}
+            <code className="bg-white px-2 py-0.5 rounded">for</code>
+          </li>
         </ul>
       </div>
     </div>
@@ -161,4 +184,3 @@ function CodeEditor({ code, setCode }) {
 }
 
 export default CodeEditor;
-

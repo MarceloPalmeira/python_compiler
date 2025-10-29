@@ -24,17 +24,18 @@ function TabNavigation({ activeTab, setActiveTab, hasResults }) {
             className={`
               relative px-6 py-4 font-medium text-sm transition-all duration-200
               flex items-center gap-2
-              ${isActive 
-                ? 'text-apple-blue' 
-                : isDisabled 
-                  ? 'text-apple-gray-300 cursor-not-allowed'
-                  : 'text-apple-gray-600 hover:text-apple-gray-800'
+              ${
+                isActive
+                  ? 'text-apple-blue'
+                  : isDisabled
+                    ? 'text-apple-gray-300 cursor-not-allowed'
+                    : 'text-apple-gray-600 hover:text-apple-gray-800'
               }
             `}
           >
             <Icon className="w-4 h-4" />
             {tab.label}
-            
+
             {/* Indicador de aba ativa */}
             {isActive && (
               <motion.div
@@ -51,4 +52,3 @@ function TabNavigation({ activeTab, setActiveTab, hasResults }) {
 }
 
 export default TabNavigation;
-

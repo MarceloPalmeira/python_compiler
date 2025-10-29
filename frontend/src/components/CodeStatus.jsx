@@ -4,7 +4,14 @@ import { FileCode, Clock, Trash2, RotateCcw } from 'lucide-react';
 import { useCodeContext } from '../contexts/CodeContext';
 
 function CodeStatus() {
-  const { currentCodeId, codeHistory, clearCurrentCodeId, clearHistory, hasCodeLoaded, updateCurrentCodeId } = useCodeContext();
+  const {
+    currentCodeId,
+    codeHistory,
+    clearCurrentCodeId,
+    clearHistory,
+    hasCodeLoaded,
+    updateCurrentCodeId,
+  } = useCodeContext();
 
   if (!hasCodeLoaded && codeHistory.length === 0) {
     return null;
@@ -36,7 +43,9 @@ function CodeStatus() {
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-green-800">Código Atual Carregado</p>
+              <p className="text-sm font-medium text-green-800">
+                Código Atual Carregado
+              </p>
               <code className="text-xs text-green-600 font-mono bg-white px-2 py-1 rounded mt-1 inline-block">
                 {currentCodeId}
               </code>
@@ -63,9 +72,10 @@ function CodeStatus() {
                 key={item.id}
                 className={`
                   flex items-center justify-between p-3 rounded-lg border
-                  ${item.id === currentCodeId
-                    ? 'bg-blue-50 border-blue-200'
-                    : 'bg-white border-apple-gray-200'
+                  ${
+                    item.id === currentCodeId
+                      ? 'bg-blue-50 border-blue-200'
+                      : 'bg-white border-apple-gray-200'
                   }
                 `}
               >
@@ -105,4 +115,3 @@ function CodeStatus() {
 }
 
 export default CodeStatus;
-

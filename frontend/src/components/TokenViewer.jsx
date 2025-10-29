@@ -83,7 +83,8 @@ function TokenViewer({ tokens, codeId }) {
             Análise Léxica - Tokens
           </h2>
           <p className="text-sm text-apple-gray-500">
-            {filteredTokens.length} token{filteredTokens.length !== 1 ? 's' : ''} encontrado
+            {filteredTokens.length} token
+            {filteredTokens.length !== 1 ? 's' : ''} encontrado
             {filteredTokens.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -111,7 +112,9 @@ function TokenViewer({ tokens, codeId }) {
             className="bg-white rounded-xl p-4 border border-apple-gray-200 apple-shadow"
           >
             <div className="text-2xl mb-1">{TOKEN_ICONS[type] || '🏷️'}</div>
-            <div className="text-2xl font-bold text-apple-gray-800">{count}</div>
+            <div className="text-2xl font-bold text-apple-gray-800">
+              {count}
+            </div>
             <div className="text-xs text-apple-gray-500 mt-1">{type}</div>
           </motion.div>
         ))}
@@ -139,8 +142,7 @@ function TokenViewer({ tokens, codeId }) {
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-apple-gray-600 uppercase tracking-wider sticky left-0 z-20 bg-apple-gray-50">
                   <div className="flex items-center gap-2">
-                    <Hash className="w-4 h-4" />
-                    #
+                    <Hash className="w-4 h-4" />#
                   </div>
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-apple-gray-600 uppercase tracking-wider">
@@ -168,7 +170,7 @@ function TokenViewer({ tokens, codeId }) {
                 {filteredTokens.map((token, index) => {
                   const type = token.type || 'DEFAULT';
                   const colorClass = TOKEN_COLORS[type] || TOKEN_COLORS.DEFAULT;
-                  
+
                   return (
                     <motion.tr
                       key={`${index}-${token.text}`}
@@ -182,7 +184,9 @@ function TokenViewer({ tokens, codeId }) {
                         {index + 1}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium border ${colorClass}`}>
+                        <span
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium border ${colorClass}`}
+                        >
                           {TOKEN_ICONS[type] || '🏷️'}
                           {type}
                         </span>
@@ -220,4 +224,3 @@ function TokenViewer({ tokens, codeId }) {
 }
 
 export default TokenViewer;
-

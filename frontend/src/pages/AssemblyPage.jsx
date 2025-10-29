@@ -18,10 +18,11 @@ function AssemblyPage() {
 
     setAsmLoading(true);
     setAsmError(null);
-    
-    compilerAPI.getASM(currentCodeId)
+
+    compilerAPI
+      .getASM(currentCodeId)
       .then(setAsmCode)
-      .catch(err => setAsmError(err.message))
+      .catch((err) => setAsmError(err.message))
       .finally(() => setAsmLoading(false));
   }, [currentCodeId]);
 
@@ -61,4 +62,3 @@ function AssemblyPage() {
 }
 
 export default AssemblyPage;
-

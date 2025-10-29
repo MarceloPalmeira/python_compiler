@@ -65,11 +65,12 @@ function InfoCard({ icon, title, description }) {
       className="glass-morphism rounded-2xl p-6 apple-shadow cursor-default"
     >
       <div className="text-4xl mb-3">{icon}</div>
-      <h3 className="font-semibold text-lg text-apple-gray-800 mb-2">{title}</h3>
+      <h3 className="font-semibold text-lg text-apple-gray-800 mb-2">
+        {title}
+      </h3>
       <p className="text-sm text-apple-gray-500">{description}</p>
     </motion.div>
   );
 }
 
 export default EditorPage;
-

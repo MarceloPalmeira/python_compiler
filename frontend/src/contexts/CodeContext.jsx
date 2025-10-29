@@ -39,17 +39,17 @@ export const CodeProvider = ({ children }) => {
 
   const updateCurrentCodeId = (codeId) => {
     setCurrentCodeId(codeId);
-    
+
     // Adiciona ao histórico se não existir
-    if (codeId && !codeHistory.some(item => item.id === codeId)) {
+    if (codeId && !codeHistory.some((item) => item.id === codeId)) {
       const newHistoryItem = {
         id: codeId,
         timestamp: new Date().toISOString(),
-        uploadedAt: new Date().toLocaleString('pt-BR')
+        uploadedAt: new Date().toLocaleString('pt-BR'),
       };
-      
+
       // Mantém apenas os últimos 20 itens
-      setCodeHistory(prev => [newHistoryItem, ...prev].slice(0, 20));
+      setCodeHistory((prev) => [newHistoryItem, ...prev].slice(0, 20));
     }
   };
 
@@ -68,13 +68,8 @@ export const CodeProvider = ({ children }) => {
     updateCurrentCodeId,
     clearCurrentCodeId,
     clearHistory,
-    hasCodeLoaded: !!currentCodeId
+    hasCodeLoaded: !!currentCodeId,
   };
 
-  return (
-    <CodeContext.Provider value={value}>
-      {children}
-    </CodeContext.Provider>
-  );
+  return <CodeContext.Provider value={value}>{children}</CodeContext.Provider>;
 };
-
