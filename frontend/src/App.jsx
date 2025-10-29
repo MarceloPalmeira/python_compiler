@@ -14,7 +14,7 @@ import { CodeProvider } from './contexts/CodeContext';
 function App() {
   return (
     <CodeProvider>
-      <div className="min-h-screen bg-gradient-to-br from-apple-gray-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gray-300 from-apple-gray-50 via-white to-blue-50">
         <Header />
         
         <main className="container mx-auto px-4 py-8 max-w-7xl">
